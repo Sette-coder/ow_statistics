@@ -9,14 +9,6 @@ public class CreateUserRequest
 }
 
 [System.Serializable]
-public class AppUserResponse
-{
-    public int Id;
-    public string Username;
-    public string Email;
-}
-
-[System.Serializable]
 public class CreateMapRequest
 {
     public string Name;

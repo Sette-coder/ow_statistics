@@ -142,7 +142,7 @@ public class ApiClient : MonoBehaviour
     }
 
     [ShowInInspector]
-    private async Task<AppUserResponse> CreateUserAsync(string username, string email, string password)
+    public async Task<GenericResponse> CreateUserAsync(string username, string email, string password)
     {
         CreateUserRequest requestData = new CreateUserRequest
         {
@@ -164,17 +164,16 @@ public class ApiClient : MonoBehaviour
         while (!operation.isDone)
             await Task.Yield();
 
+        GenericResponse response = JsonUtility.FromJson<GenericResponse>(request.downloadHandler.text);
         if (request.result == UnityWebRequest.Result.Success)
         {
-            AppUserResponse response = JsonUtility.FromJson<AppUserResponse>(request.downloadHandler.text);
-            Debug.Log($"response UserId: {response.Id}");
-            Debug.Log($"response Username: {response.Username}");
             return response;
         }
         else
         {
             Debug.LogError("Error creating user: " + request.error);
-            return null;
+            response.ResponseMessage = $"Error {request.responseCode}, {response.ResponseMessage}";
+            return response;
         }
     }
     
@@ -262,7 +261,7 @@ public class ApiClient : MonoBehaviour
     }
     
     [ShowInInspector]
-    private async Task<LoginResponse> Login(string usernameOrEmail, string password)
+    public async Task<LoginResponse> TryLogin(string usernameOrEmail, string password)
     {
 
         LoginRequest requestData = new LoginRequest
@@ -294,7 +293,7 @@ public class ApiClient : MonoBehaviour
         else
         {
             Debug.Log($"ERROR: {request.responseCode} with message: {response.LoginMessage}");
-            return null;
+            return response;
         }
     }
     
