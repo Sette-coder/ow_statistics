@@ -167,3 +167,11 @@ public enum Heroes
     Anran,
     JetpackCat
 }
+
+public enum PopUpType
+{
+    Error,
+    Info,
+    Success,
+    Warning,
+}

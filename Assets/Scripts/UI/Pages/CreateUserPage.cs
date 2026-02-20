@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class CreateUserPage : BasePage
 {
-    [SerializeField] TextMeshProUGUI _errorText;
-
     [SerializeField] TMP_InputField _usernameInputField;
     [SerializeField] TMP_InputField _emailInputField;
     [SerializeField] TMP_InputField _passwordInputField;
@@ -18,8 +16,6 @@ public class CreateUserPage : BasePage
 
     private void Start()
     {
-        _errorText.text = string.Empty;
-
         _createUserButton.onClick.AddListener(CreateNewUserCheck);
         _backToLoginButton.onClick.AddListener(() =>
         {
@@ -30,7 +26,7 @@ public class CreateUserPage : BasePage
         _usernameInputField.onValueChanged.AddListener(InputFieldCheck);
         _emailInputField.onValueChanged.AddListener(InputFieldCheck);
         _passwordInputField.onValueChanged.AddListener(InputFieldCheck);
-        
+
         InputFieldCheck("");
     }
 
@@ -38,57 +34,80 @@ public class CreateUserPage : BasePage
     {
         if (string.IsNullOrEmpty(_usernameInputField.text))
         {
-            _errorText.text = "Username field is empty, please enter a username";
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                "Username field is empty, please enter a username"
+            );
             return;
         }
 
         if (string.IsNullOrEmpty(_emailInputField.text))
         {
-            _errorText.text = "Email field is empty, please enter a valid email address";
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                "Email field is empty, please enter a valid email address"
+            );
             return;
         }
 
         if (string.IsNullOrEmpty(_passwordInputField.text))
         {
-            _errorText.text = "Password field is empty, please enter your password";
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                "Password field is empty, please enter your password"
+            );
             return;
         }
 
         var createUserCheck = await ApiClient.Instance.CreateUserAsync(
-            _usernameInputField.text, 
+            _usernameInputField.text,
             _emailInputField.text,
             _passwordInputField.text);
 
         if (!createUserCheck.ok)
         {
-            _errorText.text = createUserCheck.ResponseMessage;
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                createUserCheck.ResponseMessage
+            );
         }
         else
         {
-            _loginPage.EnablePage();
-            DisablePage();
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Success,
+                "User Created",
+                "User Created Successfully",
+                () =>
+                    {
+                        _loginPage.EnablePage();
+                        DisablePage();
+                    });
         }
     }
 
     public override void DisablePage()
     {
-        _usernameInputField.text = ""; 
-        _emailInputField.text = ""; 
+        _usernameInputField.text = "";
+        _emailInputField.text = "";
         _passwordInputField.text = "";
-        
+
         _createUserButton.interactable = false;
-        
+
         base.DisablePage();
     }
-    
+
     public override void EnablePage()
     {
-        _usernameInputField.text = ""; 
-        _emailInputField.text = ""; 
+        _usernameInputField.text = "";
+        _emailInputField.text = "";
         _passwordInputField.text = "";
-        
+
         _createUserButton.interactable = false;
-        
+
         base.EnablePage();
     }
 
@@ -99,19 +118,19 @@ public class CreateUserPage : BasePage
             _createUserButton.interactable = false;
             return;
         }
-        
+
         if (string.IsNullOrWhiteSpace(_emailInputField.text))
         {
             _createUserButton.interactable = false;
             return;
         }
-        
+
         if (string.IsNullOrWhiteSpace(_passwordInputField.text))
         {
             _createUserButton.interactable = false;
             return;
         }
-        
+
         _createUserButton.interactable = true;
     }
 }

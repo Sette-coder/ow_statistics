@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class LoginPage : BasePage
 {
-    [SerializeField] TextMeshProUGUI _errorText;
-    
     [SerializeField] TMP_InputField _usernameInputField;
     [SerializeField] TMP_InputField _passwordInputField;
     [SerializeField] Button _loginButton;
@@ -19,8 +17,6 @@ public class LoginPage : BasePage
 
     private void Start()
     {
-        _errorText.text = string.Empty;
-        
         _loginButton.onClick.AddListener(LoginDataCheck);
         _createUserButton.onClick.AddListener(() =>
         {
@@ -38,13 +34,21 @@ public class LoginPage : BasePage
     {
         if (string.IsNullOrEmpty(_usernameInputField.text))
         {
-            _errorText.text = "Username field is empty, please enter a username or email";
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                "Username field is empty, please enter a username or email"
+                );
             return;
         }
         
         if (string.IsNullOrEmpty(_passwordInputField.text))
         {
-            _errorText.text = "Password field is empty, please enter your password";
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                "Password field is empty, please enter your password"
+            );
             return;
         }
 
@@ -52,7 +56,11 @@ public class LoginPage : BasePage
 
         if (!loginCheck.Authorized)
         {
-            _errorText.text = loginCheck.LoginMessage;
+            UiManager.Instance.OpenPopUp(
+                PopUpType.Error,
+                "Error",
+                loginCheck.LoginMessage
+            );
         }
         else
         {
