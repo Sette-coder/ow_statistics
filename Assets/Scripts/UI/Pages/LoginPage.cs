@@ -15,7 +15,7 @@ public class LoginPage : BasePage
     [SerializeField] BasePage _homePage;
     
 
-    private void Start()
+    protected override void Start()
     {
         _loginButton.onClick.AddListener(LoginDataCheck);
         _createUserButton.onClick.AddListener(() =>
@@ -28,6 +28,8 @@ public class LoginPage : BasePage
         _passwordInputField.onValueChanged.AddListener(InputFieldCheck);
 
         InputFieldCheck("");
+        
+        base.Start();
     }
     
     private async void LoginDataCheck()

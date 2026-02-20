@@ -12,14 +12,13 @@ namespace DefaultNamespace
             if (Instance == null)
                 Instance = this;
         }
-
-        public EventHandler<(string username, string userEmail)> OnLoginSuccess;
-        
         private void Awake()
         {
             SingletonSetup();
         }
         
+        public EventHandler<(string username, string userEmail)> OnLoginSuccess;
+        public EventHandler OnLogout;
         
     }
 }

@@ -22,8 +22,14 @@ public class UiManager : MonoBehaviour
     {
         _popUp.Open(type, title, message, callback);
     }
+    
     public void OpenPopUp(PopUpType type, string title, string message)
     {
         _popUp.Open(type, title, message);
+    }
+    
+    public void OpenPopUp(string title, string message, Action confirmCallback, Action refuseCallback)
+    {
+        _popUp.Open(title, message, confirmCallback, refuseCallback);
     }
 }

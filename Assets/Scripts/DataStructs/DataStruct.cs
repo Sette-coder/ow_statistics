@@ -174,4 +174,5 @@ public enum PopUpType
     Info,
     Success,
     Warning,
+    Confirm
 }

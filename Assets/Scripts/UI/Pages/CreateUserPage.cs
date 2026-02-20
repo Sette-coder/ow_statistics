@@ -1,4 +1,4 @@
-using System;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +14,7 @@ public class CreateUserPage : BasePage
 
     [SerializeField] LoginPage _loginPage;
 
-    private void Start()
+    protected override void Start()
     {
         _createUserButton.onClick.AddListener(CreateNewUserCheck);
         _backToLoginButton.onClick.AddListener(() =>
@@ -28,6 +28,8 @@ public class CreateUserPage : BasePage
         _passwordInputField.onValueChanged.AddListener(InputFieldCheck);
 
         InputFieldCheck("");
+        
+        base.Start();
     }
 
     private async void CreateNewUserCheck()
@@ -119,7 +121,7 @@ public class CreateUserPage : BasePage
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_emailInputField.text))
+        if (!IsValidEmail(_emailInputField.text))
         {
             _createUserButton.interactable = false;
             return;
@@ -132,5 +134,17 @@ public class CreateUserPage : BasePage
         }
 
         _createUserButton.interactable = true;
+    }
+
+    bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        return Regex.IsMatch(
+            email,
+            @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+            RegexOptions.IgnoreCase
+        );
     }
 }

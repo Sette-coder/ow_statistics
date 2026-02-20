@@ -19,12 +19,19 @@ namespace DefaultNamespace
         private void Start()
         {
             GameEventManager.Instance.OnLoginSuccess += SetUserData;
+            GameEventManager.Instance.OnLogout += ClearUserData;
         }
 
         private void SetUserData(object sender, (string username, string userEmail)userData)
         {
             _username = userData.username;
             _userEmail = userData.userEmail;
+        }
+        
+        private void ClearUserData(object sender, EventArgs empty)
+        {
+            _username = "";
+            _userEmail = "";
         }
         
         public string GetUserEmail() => _userEmail;
