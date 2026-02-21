@@ -42,26 +42,6 @@ public struct Hero
     }
 }
 
-public struct MatchData
-{
-    public string UserEmail;
-    public MatchResult MatchResult;
-    public Maps Map;
-    public int Season;
-    public Ranks Rank;
-    public int RankDivision;
-    public int RankPercentage;
-    public Heroes Hero_1;
-    public Heroes Hero_2;
-    public Heroes Hero_3;
-    public Heroes TeamHeroBan1;
-    public Heroes TeamHeroBan2;
-    public Heroes EnemyTeamHeroBan1;
-    public Heroes EnemyTeamHeroBan2;
-    [CanBeNull] public string TeamNotes;
-    [CanBeNull] public string EnemyTeamNotes;
-}
-
 public enum MatchResult
 {
     Win,
@@ -83,30 +63,31 @@ public enum Ranks
 
 public enum Maps
 {
-    KingsRow,
+    Kings_Row,
+    Watchpoint_Gibraltar,
     Numbani,
     Dorado,
     Hollywood,
-    LijiangTower,
+    Lijiang_Tower,
     Ilios,
     Nepal,
     Route66,
     Eichenwalde,
     Oasis,
     Junkertown,
-    BlizzardWorld,
+    Blizzard_World,
     Rialto,
     Busan,
     Havana,
-    NewQueenStreet,
-    CircuitRoyal,
+    New_Queen_Street,
+    Circuit_Royal,
     Colosseo,
     Midtown,
     Paraiso,
     Esperanca,
-    ShambaliMonastery,
-    AntarcticPeninsula,
-    NewJunkCity,
+    Shambali_Monastery,
+    Antarctic_Peninsula,
+    New_Junk_City,
     Suravasa,
     Samoa,
     Runasapi,
@@ -120,7 +101,7 @@ public enum Heroes
     Reaper,
     Widowmaker,
     Phara,
-    ReinHardt,
+    Reinhardt,
     Mercy,
     Torbjorn,
     Hanzo,
@@ -143,13 +124,13 @@ public enum Heroes
     Doomfist,
     Moira,
     Brigitte,
-    WreckingBall,
+    Wrecking_Ball,
     Ashe,
     Baptiste,
     Sigma,
     Echo,
     Sojourn,
-    JunkerQueen,
+    Junker_Queen,
     Kiriko,
     Ramattra,
     Lifeweaver,
@@ -165,7 +146,7 @@ public enum Heroes
     Emre,
     Mizuki,
     Anran,
-    JetpackCat
+    Jetpack_Cat
 }
 
 public enum PopUpType

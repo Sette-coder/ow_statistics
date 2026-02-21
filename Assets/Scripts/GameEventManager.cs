@@ -17,7 +17,7 @@ namespace DefaultNamespace
             SingletonSetup();
         }
         
-        public EventHandler<(string username, string userEmail)> OnLoginSuccess;
+        public EventHandler<LoginResponse> OnLoginSuccess;
         public EventHandler OnLogout;
         
     }

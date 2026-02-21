@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DefaultNamespace;
 using UnityEngine;
@@ -9,12 +10,13 @@ using Sirenix.OdinInspector;
 public class ApiClient : MonoBehaviour
 {
     public static ApiClient Instance;
+
     private void SingletonSetup()
     {
         if (Instance == null)
             Instance = this;
     }
-    
+
     private readonly MapData[] _mapsList = new[]
     {
         new MapData("King's Row", MapMode.Hybrid),
@@ -101,8 +103,8 @@ public class ApiClient : MonoBehaviour
         new Hero("Anran", HeroRoles.Damage),
         new Hero("Jetpack Cat", HeroRoles.Support),
     };
-    
-    private string baseUrl = "http://localhost:5144/api"; // Your local API
+
+    private string baseUrl = "https://owStatisticsBalancer-1116562401.eu-central-1.elb.amazonaws.com:443/api"; // Your local API
 
     [ShowInInspector]
     private async void InitializeAllMaps()
@@ -119,7 +121,7 @@ public class ApiClient : MonoBehaviour
             }
         }
     }
-    
+
     [ShowInInspector]
     private async void InitializeAllHeroes()
     {
@@ -135,7 +137,7 @@ public class ApiClient : MonoBehaviour
             }
         }
     }
-    
+
     private void Awake()
     {
         SingletonSetup();
@@ -148,7 +150,8 @@ public class ApiClient : MonoBehaviour
         {
             Username = username,
             Email = email,
-            Password = password
+            Password = password,
+            Role = "Client"
         };
 
         string json = JsonUtility.ToJson(requestData);
@@ -158,11 +161,8 @@ public class ApiClient : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        
-        var operation = request.SendWebRequest();
-        
-        while (!operation.isDone)
-            await Task.Yield();
+
+        await request.SendWebRequest();
 
         GenericResponse response = JsonUtility.FromJson<GenericResponse>(request.downloadHandler.text);
         if (request.result == UnityWebRequest.Result.Success)
@@ -176,7 +176,7 @@ public class ApiClient : MonoBehaviour
             return response;
         }
     }
-    
+
     [ShowInInspector]
     private async Task<MapResponse> CreateMapAsync(string mapName, MapMode mapMode)
     {
@@ -201,10 +201,7 @@ public class ApiClient : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        var operation = request.SendWebRequest();
-        
-        while (!operation.isDone)
-            await Task.Yield();
+        await request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
@@ -218,7 +215,7 @@ public class ApiClient : MonoBehaviour
             return null;
         }
     }
-    
+
     [ShowInInspector]
     private async Task<HeroResponse> CreateHeroAsync(string heroName, HeroRoles role)
     {
@@ -242,10 +239,7 @@ public class ApiClient : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        var operation = request.SendWebRequest();
-        
-        while (!operation.isDone)
-            await Task.Yield();
+        await request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
@@ -259,11 +253,10 @@ public class ApiClient : MonoBehaviour
             return null;
         }
     }
-    
+
     [ShowInInspector]
     public async Task<LoginResponse> TryLogin(string usernameOrEmail, string password)
     {
-
         LoginRequest requestData = new LoginRequest
         {
             UsernameOrEmail = usernameOrEmail,
@@ -271,57 +264,35 @@ public class ApiClient : MonoBehaviour
         };
 
         string json = JsonUtility.ToJson(requestData);
-
         UnityWebRequest request = new UnityWebRequest(baseUrl + "/user/login", "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        var operation = request.SendWebRequest();
-        
-        while (!operation.isDone)
-            await Task.Yield();
-        
+        await request.SendWebRequest();
+
         LoginResponse response = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"LOGIN COMPLETED you are authorized: {response.Authorized}, with message: {response.LoginMessage}");
-            GameEventManager.Instance.OnLoginSuccess.Invoke(this,(response.Username, response.UserEmail));
+            Debug.Log(
+                $"LOGIN COMPLETED you are authorized: {response.Authorized}, with message: {response.LoginMessage}");
+            GameEventManager.Instance.OnLoginSuccess.Invoke(this, response);
             return response;
         }
         else
         {
-            Debug.Log($"ERROR: {request.responseCode} with message: {response.LoginMessage}");
+            Debug.LogError($"ERROR: {request.responseCode} with message: {response.LoginMessage}");
             return response;
         }
     }
-    
+
     [ShowInInspector]
-    private async Task<GenericResponse> AddNewMatch(MatchData matchData)
+    public async Task<GenericResponse> SendMatchData(MatchDataSubmitRequest matchData)
     {
-
-        MatchRequest requestData = new MatchRequest
-        {
-            UserEmail = UserDataManager.Instance.GetUserEmail(),
-            MatchResult = matchData.MatchResult.ToString(),
-            MapName = matchData.Map.ToString(),
-            Season = matchData.Season,
-            Rank = matchData.Rank.ToString(),
-            RankDivision = matchData.RankDivision,
-            RankPercentage = matchData.RankPercentage,
-            Hero_1 = matchData.Hero_1.ToString(),
-            Hero_2 = matchData.Hero_2 != Heroes.None ? matchData.Hero_2.ToString() : string.Empty,
-            Hero_3 = matchData.Hero_3 != Heroes.None ? matchData.Hero_3.ToString() : string.Empty,
-            TeamHeroBan1 = matchData.TeamHeroBan1.ToString(),
-            TeamHeroBan2 = matchData.TeamHeroBan2.ToString(),
-            EnemyTeamHeroBan1 = matchData.EnemyTeamHeroBan1.ToString(),
-            EnemyTeamHeroBan2 = matchData.EnemyTeamHeroBan2.ToString(),
-            TeamNotes = matchData.TeamNotes,
-            EnemyTeamNotes = matchData.EnemyTeamNotes
-        };
-
-        string json = JsonUtility.ToJson(requestData);
+        string json = JsonUtility.ToJson(matchData);
+        
+        
 
         UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/create", "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -329,21 +300,48 @@ public class ApiClient : MonoBehaviour
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        var operation = request.SendWebRequest();
-        
-        while (!operation.isDone)
-            await Task.Yield();
-        
+        await request.SendWebRequest();
+
         GenericResponse response = JsonUtility.FromJson<GenericResponse>(request.downloadHandler.text);
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"LOGIN COMPLETED you are authorized: {response.ok}, with message: {response.ResponseMessage}");
-            
+            Debug.Log($"Match Upload OK: {response.ok}, with message: {response.ResponseMessage}");
             return response;
         }
         else
         {
-            Debug.Log($"ERROR: {request.responseCode} with message: {response.ResponseMessage}");
+            Debug.LogError($"ERROR: {request.responseCode} with message: {response.ResponseMessage}");
+            response.ResponseMessage = $"Error {request.responseCode}, {response.ResponseMessage}";
+            return response;
+        }
+    }
+
+    public async Task<List<MatchResponse>> GetMatchListByEmail(string userEmail)
+    {
+        EmailRequest requestData = new EmailRequest
+        {
+            UserEmail = userEmail
+        };
+        
+        string json = JsonUtility.ToJson(requestData);
+        UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/get-by-email", "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        await request.SendWebRequest();
+
+        MatchListResponse response = JsonUtility.FromJson<MatchListResponse>(request.downloadHandler.text);
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Match List retrieved Successfully: {response.Matches.Count}");
+            return response.Matches;
+        }
+        else
+        {
+            Debug.LogError($"ERROR: {request.responseCode} with message: {request.error}");
             return null;
         }
     }

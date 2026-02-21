@@ -19,8 +19,7 @@ public class CreateUserPage : BasePage
         _createUserButton.onClick.AddListener(CreateNewUserCheck);
         _backToLoginButton.onClick.AddListener(() =>
         {
-            _loginPage.EnablePage();
-            DisablePage();
+            UiManager.Instance.ChangePage(_loginPage);
         });
 
         _usernameInputField.onValueChanged.AddListener(InputFieldCheck);
@@ -85,8 +84,7 @@ public class CreateUserPage : BasePage
                 "User Created Successfully",
                 () =>
                     {
-                        _loginPage.EnablePage();
-                        DisablePage();
+                        UiManager.Instance.ChangePage(_loginPage);
                     });
         }
     }

@@ -5,6 +5,9 @@ using UnityEngine;
 public class UiManager : MonoBehaviour
 {
     public static UiManager Instance;
+
+    private BasePage _currentPage;
+    
     private void SingletonSetup()
     {
         if (Instance == null)
@@ -31,5 +34,20 @@ public class UiManager : MonoBehaviour
     public void OpenPopUp(string title, string message, Action confirmCallback, Action refuseCallback)
     {
         _popUp.Open(title, message, confirmCallback, refuseCallback);
+    }
+
+    public void ChangePage(BasePage nextPage)
+    {
+        if (_currentPage == nextPage) return;
+        
+        _currentPage.DisablePage();
+        nextPage.EnablePage();
+        _currentPage = nextPage;
+    }
+    
+    public void SetCurrentPage(BasePage currentPage)
+    {
+        if(_currentPage != null) _currentPage.DisablePage();
+        _currentPage = currentPage;
     }
 }

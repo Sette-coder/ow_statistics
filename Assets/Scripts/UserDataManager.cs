@@ -9,6 +9,7 @@ namespace DefaultNamespace
 
         private string _userEmail;
         private string _username;
+        private string _role;
         
         private void Awake()
         {
@@ -22,10 +23,11 @@ namespace DefaultNamespace
             GameEventManager.Instance.OnLogout += ClearUserData;
         }
 
-        private void SetUserData(object sender, (string username, string userEmail)userData)
+        private void SetUserData(object sender, LoginResponse userData)
         {
-            _username = userData.username;
-            _userEmail = userData.userEmail;
+            _username = userData.Username;
+            _userEmail = userData.UserEmail;
+            _role = userData.Role;
         }
         
         private void ClearUserData(object sender, EventArgs empty)

@@ -17,11 +17,12 @@ public class LoginPage : BasePage
 
     protected override void Start()
     {
+        UiManager.Instance.SetCurrentPage(this);
+        
         _loginButton.onClick.AddListener(LoginDataCheck);
         _createUserButton.onClick.AddListener(() =>
         {
-            _createUserPage.EnablePage();
-            DisablePage();
+            UiManager.Instance.ChangePage(_createUserPage);
         });
         
         _usernameInputField.onValueChanged.AddListener(InputFieldCheck);
@@ -66,8 +67,7 @@ public class LoginPage : BasePage
         }
         else
         {
-            _homePage.EnablePage();
-            DisablePage();
+            UiManager.Instance.ChangePage(_homePage);
         }
     }
     

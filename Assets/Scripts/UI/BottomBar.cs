@@ -4,24 +4,31 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TopBar : MonoBehaviour
+public class BottomBar : MonoBehaviour
 {
-    
     [SerializeField] TextMeshProUGUI _usernameText;
-    [SerializeField] Button _logoutButton;
+    [SerializeField] TextMeshProUGUI _pageTitleText;
+    [SerializeField] GameObject _content;
     
-    [SerializeField] BasePage _homePage;
+    [SerializeField] Button _logoutButton;
+    [SerializeField] Button _openLateralMenuButton;
+    
+    [SerializeField] LateralBar _lateralBar;
+    
     [SerializeField] BasePage _loginPage;
 
     private void Start()
     {
         GameEventManager.Instance.OnLoginSuccess += OnLoginSuccess;
         _logoutButton.onClick.AddListener(Logout);
+        _openLateralMenuButton.onClick.AddListener(_lateralBar.Open);
+        _content.SetActive(false);
     }
     
-    private void OnLoginSuccess(object sender ,(string username, string userEmail)userData)
+    private void OnLoginSuccess(object sender ,LoginResponse loginResponse)
     {
-        _usernameText.text = userData.username;
+        _usernameText.text = loginResponse.Username;
+        _content.SetActive(true);
     }
 
     void Logout()
@@ -31,13 +38,17 @@ public class TopBar : MonoBehaviour
             "Do you really want to logout?",
             () =>
             {
-                _homePage.DisablePage();
-                _loginPage.EnablePage();
-                
+                UiManager.Instance.ChangePage(_loginPage);
+                _content.SetActive(false);
                 GameEventManager.Instance.OnLogout?.Invoke(this,EventArgs.Empty);
             },
             ()=>{}
             );
         
+    }
+    
+    public void UpdatePageTitle(string pageTitle)
+    {
+        _pageTitleText.text = pageTitle;
     }
 }
