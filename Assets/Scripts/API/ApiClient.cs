@@ -104,7 +104,7 @@ public class ApiClient : MonoBehaviour
         new Hero("Jetpack Cat", HeroRoles.Support),
     };
 
-    private string baseUrl = "https://owStatisticsBalancer-1116562401.eu-central-1.elb.amazonaws.com:443/api"; // Your local API
+    private string baseUrl = "https://api.thaseven.com/owstatistics/api"; // Your local API
 
     [ShowInInspector]
     private async void InitializeAllMaps()
