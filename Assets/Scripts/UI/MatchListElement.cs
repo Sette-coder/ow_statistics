@@ -17,19 +17,19 @@ public class MatchListElement : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _teamNotesText;
     [SerializeField] private TextMeshProUGUI _enemyTeamNotesText;
 
-    public void InitializeElements(MatchResponse matchResponse)
+    public void InitializeElements(MatchData matchResponse)
     {
         _matchResultText.text = matchResponse.MatchResult;
-        _mapNameText.text = matchResponse.MapName;
+        _mapNameText.text = Tha7.Utility.StringWrapper.ToMapName(matchResponse.MapName);
         _seasonText.text = matchResponse.Season;
         _rankText.text = $"{matchResponse.Rank} {matchResponse.RankDivision} - {matchResponse.RankPercentage}%";
-        _hero1Text.text = matchResponse.Hero_1;
-        _hero2Text.text = matchResponse.Hero_2;
-        _hero3Text.text = matchResponse.Hero_3;
-        _teamBan1Text.text = matchResponse.TeamBan_1;
-        _teamBan2Text.text = matchResponse.TeamBan_2;
-        _enemyTeamBan1Text.text = matchResponse.EnemyTeamBan_1;
-        _enemyTeamBan2Text.text = matchResponse.EnemyTeamBan_2;
+        _hero1Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.Hero_1);
+        _hero2Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.Hero_2);
+        _hero3Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.Hero_3);
+        _teamBan1Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.TeamBan_1);
+        _teamBan2Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.TeamBan_2);
+        _enemyTeamBan1Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.EnemyTeamBan_1);
+        _enemyTeamBan2Text.text = Tha7.Utility.StringWrapper.ToHeroName(matchResponse.EnemyTeamBan_2);
         _teamNotesText.text = matchResponse.TeamNotes;
         _enemyTeamNotesText.text = matchResponse.EnemyTeamNotes;
     }

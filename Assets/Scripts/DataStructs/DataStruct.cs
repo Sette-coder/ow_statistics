@@ -63,6 +63,7 @@ public enum Ranks
 
 public enum Maps
 {
+    None = 0,
     Kings_Row,
     Watchpoint_Gibraltar,
     Numbani,
@@ -100,7 +101,7 @@ public enum Heroes
     Tracer,
     Reaper,
     Widowmaker,
-    Phara,
+    Pharah,
     Reinhardt,
     Mercy,
     Torbjorn,

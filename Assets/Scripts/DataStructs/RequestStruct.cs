@@ -59,27 +59,6 @@ public class LoginResponse
 }
 
 [System.Serializable]
-public class MatchRequest
-{
-    public string UserEmail;
-    public string MatchResult;
-    public string MapName;
-    public int Season;
-    public string Rank;
-    public int RankDivision;
-    public int RankPercentage;
-    public string Hero_1;
-    [CanBeNull] public string Hero_2;
-    [CanBeNull] public string Hero_3;
-    public string TeamHeroBan1;
-    public string TeamHeroBan2;
-    public string EnemyTeamHeroBan1;
-    public string EnemyTeamHeroBan2;
-    [CanBeNull] public string TeamNotes;
-    [CanBeNull] public string EnemyTeamNotes;
-}
-
-[System.Serializable]
 public class GenericResponse
 {
     public bool ok;
@@ -89,7 +68,7 @@ public class GenericResponse
 [System.Serializable]
 public class MatchDataSubmitRequest
 {
-    public string UserEmail;
+    public string Username;
     public string MapName;
     public string Season;
     public string Rank;
@@ -108,16 +87,37 @@ public class MatchDataSubmitRequest
 }
 
 [System.Serializable]
-public class EmailRequest
+public class UsernameRequest
 {
-    public string UserEmail;
+    public string Username;
 }
 
+public class MatchData
+{
+    public int Id;
+    public string Username;
+    public string UploadTime;
+    public Maps MapName;
+    public string Season;
+    public string Rank;
+    public int RankDivision;
+    public int RankPercentage;
+    public Heroes Hero_1;
+    public Heroes Hero_2;
+    public Heroes Hero_3;
+    public string MatchResult;
+    public Heroes TeamBan_1;
+    public Heroes TeamBan_2;
+    public Heroes EnemyTeamBan_1;
+    public Heroes EnemyTeamBan_2;
+    public string TeamNotes;
+    public string EnemyTeamNotes;
+}
 [System.Serializable]
 public class MatchResponse
 {
     public int Id;
-    public string UserEmail;
+    public string Username;
     public string UploadTime;
     public string MapName;
     public string Season;

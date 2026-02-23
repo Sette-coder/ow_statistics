@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using DefaultNamespace;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
+using static Tha7.Utility.StringWrapper;
 
 public class MatchLoader : MonoBehaviour
 {
@@ -36,20 +35,13 @@ public class MatchLoader : MonoBehaviour
         List<TMP_Dropdown.OptionData> mapOptions = new List<TMP_Dropdown.OptionData>();
         foreach (Maps map in Enum.GetValues(typeof(Maps)))
         {
-            string mapName = map.ToString();
-            // if (mapName.Contains('_'))
-            //     mapName = mapName.Replace('_', ' ');
-            mapOptions.Add(new TMP_Dropdown.OptionData(mapName));
+            mapOptions.Add(new TMP_Dropdown.OptionData(ToMapName(map)));
         }
 
         List<TMP_Dropdown.OptionData> heroOptions = new List<TMP_Dropdown.OptionData>();
         foreach (Heroes hero in Enum.GetValues(typeof(Heroes)))
         {
-            string heroName = hero.ToString();
-            // if (heroName.Contains('_'))
-            //     heroName = heroName.Replace('_', ' ');
-
-            heroOptions.Add(new TMP_Dropdown.OptionData(heroName));
+            heroOptions.Add(new TMP_Dropdown.OptionData(ToHeroName(hero)));
         }
 
         List<TMP_Dropdown.OptionData> rankOptions = new List<TMP_Dropdown.OptionData>();
@@ -178,7 +170,7 @@ public class MatchLoader : MonoBehaviour
 
         MatchDataSubmitRequest request = new MatchDataSubmitRequest
         {
-            UserEmail = UserDataManager.Instance.GetUserEmail(),
+            Username = UserDataManager.Instance.GetUsername(),
             MapName = _mapDropdown.options[_mapDropdown.value].text,
             Season = _seasonInputField.text,
             Rank = _rankDropDown.options[_rankDropDown.value].text,
@@ -199,6 +191,8 @@ public class MatchLoader : MonoBehaviour
             TeamNotes = _teamNotes.text,
             EnemyTeamNotes = _enemyTeamNotes.text
         };
+        
+        Debug.Log(JsonUtility.ToJson(request));
 
         var response = await ApiClient.Instance.SendMatchData(request);
 

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DefaultNamespace;
 using UnityEngine;
 using UnityEngine.Networking;
 using Sirenix.OdinInspector;
@@ -104,7 +103,8 @@ public class ApiClient : MonoBehaviour
         new Hero("Jetpack Cat", HeroRoles.Support),
     };
 
-    private string baseUrl = "https://api.thaseven.com/owstatistics/api"; // Your local API
+    private string baseUrl = "https://api.thaseven.com/owstatistics/api"; // EC2 API Instace
+    //private string baseUrl = "http://localhost:5144/owstatistics/api"; // Your local API
 
     [ShowInInspector]
     private async void InitializeAllMaps()
@@ -291,8 +291,6 @@ public class ApiClient : MonoBehaviour
     public async Task<GenericResponse> SendMatchData(MatchDataSubmitRequest matchData)
     {
         string json = JsonUtility.ToJson(matchData);
-        
-        
 
         UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/create", "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -316,15 +314,15 @@ public class ApiClient : MonoBehaviour
         }
     }
 
-    public async Task<List<MatchResponse>> GetMatchListByEmail(string userEmail)
+    public async Task<List<MatchData>> GetMatchListByUsername(string username)
     {
-        EmailRequest requestData = new EmailRequest
+        UsernameRequest requestData = new UsernameRequest
         {
-            UserEmail = userEmail
+            Username = username
         };
         
         string json = JsonUtility.ToJson(requestData);
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/get-by-email", "POST");
+        UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/get-by-username", "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
@@ -337,7 +335,35 @@ public class ApiClient : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log($"Match List retrieved Successfully: {response.Matches.Count}");
-            return response.Matches;
+            var result = new List<MatchData>();
+
+            foreach (var match in response.Matches)
+            {
+                var newMatch = new MatchData
+                {
+                    Id = match.Id,
+                    Username = match.Username,
+                    UploadTime = match.UploadTime,
+                    MapName = Tha7.Utility.StringWrapper.FromMapName(match.MapName),
+                    Season = match.Season,
+                    Rank = match.Rank,
+                    RankDivision = match.RankDivision,
+                    RankPercentage = match.RankPercentage,
+                    Hero_1 = Tha7.Utility.StringWrapper.FromHeroName(match.Hero_1),
+                    Hero_2 = Tha7.Utility.StringWrapper.FromHeroName(match.Hero_2),
+                    Hero_3 = Tha7.Utility.StringWrapper.FromHeroName(match.Hero_3),
+                    MatchResult = match.MatchResult,
+                    TeamBan_1 = Tha7.Utility.StringWrapper.FromHeroName(match.TeamBan_1),
+                    TeamBan_2 = Tha7.Utility.StringWrapper.FromHeroName(match.TeamBan_2),
+                    EnemyTeamBan_1 = Tha7.Utility.StringWrapper.FromHeroName(match.EnemyTeamBan_1),
+                    EnemyTeamBan_2 = Tha7.Utility.StringWrapper.FromHeroName(match.EnemyTeamBan_2),
+                    TeamNotes = match.TeamNotes,
+                    EnemyTeamNotes = match.EnemyTeamNotes
+                };
+                result.Add(newMatch);
+            }
+            
+            return result;
         }
         else
         {

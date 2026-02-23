@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using DefaultNamespace;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,33 +10,69 @@ public class MatchListViewer : MonoBehaviour
     [SerializeField] private GameObject _matchElementPrefab;
     [SerializeField] private Button _refreshListButton;
 
+    private List<MatchListElement> _matchListElements = new List<MatchListElement>();
+
     private void Awake()
     {
         _refreshListButton.onClick.AddListener(RetrieveDataFromDb);
+
+        if (_contentTransform.childCount > 0)
+            for (int child = _contentTransform.childCount - 1; child >= 0; child--)
+                DestroyImmediate(_contentTransform.GetChild(child).gameObject);
+
+        _matchListElements = new List<MatchListElement>();
+        InstantiateMatchListElements();
     }
+
+    void InstantiateMatchListElements(int matchToInstantiate = 30)
+    {
+        for (int i = 0; i < matchToInstantiate; i++)
+        {
+            var newMatchElement = Instantiate(_matchElementPrefab, _contentTransform).GetComponent<MatchListElement>();
+            newMatchElement.gameObject.SetActive(false);
+            _matchListElements.Add(newMatchElement);
+        }
+    }
+
+    private void OnEnable()
+    {
+        UpdateList();
+    }
+
 
     [ShowInInspector]
     public async void RetrieveDataFromDb()
     {
         _refreshListButton.interactable = false;
-        var matches = await ApiClient.Instance.GetMatchListByEmail(UserDataManager.Instance.GetUserEmail());
-        if (matches != null)
-        {
-            InitializeList(matches);
-        }
+        await UserDataManager.Instance.UpdateMatchesData();
         _refreshListButton.interactable = true;
+
+        UpdateList();
     }
 
-    void InitializeList(List<MatchResponse> matches)
+    void UpdateList()
     {
-        if (_contentTransform.childCount > 0)
-            for (int child = _contentTransform.childCount - 1; child >= 0; child--)
-                DestroyImmediate(_contentTransform.GetChild(child).gameObject);
+        var matches = UserDataManager.Instance.GetMatches();
 
-        foreach (var match in matches)
+        if (matches.Count == 0) return;
+        
+        if (matches.Count > _matchListElements.Count)
         {
-            var newMatchElement = Instantiate(_matchElementPrefab, _contentTransform);
-            newMatchElement.GetComponent<MatchListElement>().InitializeElements(match);
+            InstantiateMatchListElements(matches.Count - _matchListElements.Count);
+        }
+        
+        for (int i = 0; i < _matchListElements.Count; i++)
+        {
+            if (i < matches.Count)
+            {
+                var element = matches[i];
+                _matchListElements[i].InitializeElements(element);
+                _matchListElements[i].gameObject.SetActive(true);
+            }
+            else
+            {
+                _matchListElements[i].gameObject.SetActive(false);
+            }
         }
     }
 }
