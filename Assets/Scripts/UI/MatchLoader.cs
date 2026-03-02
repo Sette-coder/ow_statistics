@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using DefaultNamespace;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
+using static Tha7.Utility.FromDatabaseWrapper;
 
 public class MatchLoader : MonoBehaviour
 {
@@ -25,31 +25,36 @@ public class MatchLoader : MonoBehaviour
     [SerializeField] private TMP_InputField _enemyTeamNotes;
     [SerializeField] private Button _submitDataButton;
 
+    private bool _dropDownSettedUp = false;
     private void Awake()
     {
-        SetupDropDown();
         _submitDataButton.onClick.AddListener(SubmitData);
     }
-
+    
+    private void OnEnable()
+    {
+        if(!_dropDownSettedUp) SetupDropDown();
+        ResetDefault();
+    }
+    
     void SetupDropDown()
     {
         List<TMP_Dropdown.OptionData> mapOptions = new List<TMP_Dropdown.OptionData>();
-        foreach (Maps map in Enum.GetValues(typeof(Maps)))
+
+        foreach (FromDatabaseMaps map in UserDataManager.Instance.GetMapList())
         {
-            string mapName = map.ToString();
-            // if (mapName.Contains('_'))
-            //     mapName = mapName.Replace('_', ' ');
-            mapOptions.Add(new TMP_Dropdown.OptionData(mapName));
+            mapOptions.Add(new TMP_Dropdown.OptionData(map.Name));
         }
 
         List<TMP_Dropdown.OptionData> heroOptions = new List<TMP_Dropdown.OptionData>();
-        foreach (Heroes hero in Enum.GetValues(typeof(Heroes)))
-        {
-            string heroName = hero.ToString();
-            // if (heroName.Contains('_'))
-            //     heroName = heroName.Replace('_', ' ');
 
-            heroOptions.Add(new TMP_Dropdown.OptionData(heroName));
+        var heroes = UserDataManager.Instance.GetHeroesList();
+
+        if (heroes.Count == 0) return;
+        
+        foreach (FromDatabaseHeroes hero in heroes)
+        {
+            heroOptions.Add(new TMP_Dropdown.OptionData(hero.Name));
         }
 
         List<TMP_Dropdown.OptionData> rankOptions = new List<TMP_Dropdown.OptionData>();
@@ -93,12 +98,11 @@ public class MatchLoader : MonoBehaviour
 
         _enemyTeamBan2DropDown.ClearOptions();
         _enemyTeamBan2DropDown.AddOptions(heroOptions);
+
+        _dropDownSettedUp = true;
     }
 
-    private void OnEnable()
-    {
-        ResetDefault();
-    }
+
 
     void ResetDefault()
     {
@@ -126,7 +130,7 @@ public class MatchLoader : MonoBehaviour
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Season Missing", "Season Field cannot be empty");
             return;
         }
-        
+
         if (string.IsNullOrWhiteSpace(_rankPercentageInputField.text))
         {
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Rank Percentage", "Rank Percentage cannot be empty");
@@ -138,7 +142,7 @@ public class MatchLoader : MonoBehaviour
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Hero", "Cannot input the same hero twice");
             return;
         }
-        
+
         if (_hero1DropDown.value == 0)
         {
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Hero 1", "Hero 1 Cannot be None");
@@ -157,13 +161,14 @@ public class MatchLoader : MonoBehaviour
             return;
         }
 
-        if (HeroBanCheck(_hero2DropDown.value))
+
+        if (_hero2DropDown.value != 0 && HeroBanCheck(_hero2DropDown.value))
         {
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Hero 2", "You cannot be playing a banned hero");
             return;
         }
 
-        if (HeroBanCheck(_hero3DropDown.value))
+        if (_hero3DropDown.value != 0 && HeroBanCheck(_hero3DropDown.value))
         {
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Hero 3", "You cannot be playing a banned hero");
             return;
@@ -178,24 +183,24 @@ public class MatchLoader : MonoBehaviour
 
         MatchDataSubmitRequest request = new MatchDataSubmitRequest
         {
-            UserEmail = UserDataManager.Instance.GetUserEmail(),
-            MapName = _mapDropdown.options[_mapDropdown.value].text,
+            UserId = UserDataManager.Instance.GetUserId(),
+            MapId = GetMapIdFromName(_mapDropdown.options[_mapDropdown.value].text),
             Season = _seasonInputField.text,
             Rank = _rankDropDown.options[_rankDropDown.value].text,
             RankDivision = Int32.Parse(_rankDivisionDropDown.options[_rankDivisionDropDown.value].text),
             RankPercentage = Int32.Parse(_rankPercentageInputField.text),
-            Hero_1 = _hero1DropDown.options[_hero1DropDown.value].text,
-            Hero_2 = _hero2DropDown.options[_hero2DropDown.value].text == "None"
-                ? ""
-                : _hero2DropDown.options[_hero2DropDown.value].text,
-            Hero_3 = _hero3DropDown.options[_hero3DropDown.value].text == "None"
-                ? ""
-                : _hero3DropDown.options[_hero3DropDown.value].text,
+            Hero1Id = GetHeroIdFromName(_hero1DropDown.options[_hero1DropDown.value].text),
+            Hero2Id = _hero2DropDown.options[_hero2DropDown.value].text == "None"
+                ? null
+                : GetHeroIdFromName(_hero2DropDown.options[_hero2DropDown.value].text),
+            Hero3Id = _hero3DropDown.options[_hero3DropDown.value].text == "None"
+                ? null
+                : GetHeroIdFromName(_hero3DropDown.options[_hero3DropDown.value].text),
             MatchResult = _matchResultDropdown.options[_matchResultDropdown.value].text,
-            TeamBan_1 = _teamBan1DropDown.options[_teamBan1DropDown.value].text,
-            TeamBan_2 = _teamBan2DropDown.options[_teamBan2DropDown.value].text,
-            EnemyTeamBan_1 = _enemyTeamBan1DropDown.options[_enemyTeamBan1DropDown.value].text,
-            EnemyTeamBan_2 = _enemyTeamBan2DropDown.options[_enemyTeamBan2DropDown.value].text,
+            TeamBan1Id = GetHeroIdFromName(_teamBan1DropDown.options[_teamBan1DropDown.value].text),
+            TeamBan2Id = GetHeroIdFromName(_teamBan2DropDown.options[_teamBan2DropDown.value].text),
+            EnemyTeamBan1Id = GetHeroIdFromName(_enemyTeamBan1DropDown.options[_enemyTeamBan1DropDown.value].text),
+            EnemyTeamBan2Id = GetHeroIdFromName(_enemyTeamBan2DropDown.options[_enemyTeamBan2DropDown.value].text),
             TeamNotes = _teamNotes.text,
             EnemyTeamNotes = _enemyTeamNotes.text
         };
@@ -214,11 +219,18 @@ public class MatchLoader : MonoBehaviour
 
     bool DoubleHeroSettedCheck()
     {
-        return _hero1DropDown.value == _hero2DropDown.value ||
-               _hero1DropDown.value == _hero3DropDown.value ||
-               _hero2DropDown.value == _hero3DropDown.value;
+        if (_hero2DropDown.value != 0 && _hero1DropDown.value == _hero2DropDown.value) return true;
+
+        if (_hero2DropDown.value != 0 && _hero3DropDown.value != 0)
+        {
+            return _hero1DropDown.value == _hero2DropDown.value ||
+                   _hero1DropDown.value == _hero3DropDown.value ||
+                   _hero2DropDown.value == _hero3DropDown.value;
+        }
+
+        return false;
     }
-    
+
     bool HeroBanCheck(int heroValue)
     {
         return heroValue == _teamBan1DropDown.value ||

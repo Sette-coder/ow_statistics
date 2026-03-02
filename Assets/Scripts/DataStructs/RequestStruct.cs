@@ -52,31 +52,11 @@ public class LoginRequest
 public class LoginResponse
 {
     public bool Authorized;
+    public int UserId;
     public string Username;
     public string UserEmail;
     public string Role;
     public string LoginMessage;
-}
-
-[System.Serializable]
-public class MatchRequest
-{
-    public string UserEmail;
-    public string MatchResult;
-    public string MapName;
-    public int Season;
-    public string Rank;
-    public int RankDivision;
-    public int RankPercentage;
-    public string Hero_1;
-    [CanBeNull] public string Hero_2;
-    [CanBeNull] public string Hero_3;
-    public string TeamHeroBan1;
-    public string TeamHeroBan2;
-    public string EnemyTeamHeroBan1;
-    public string EnemyTeamHeroBan2;
-    [CanBeNull] public string TeamNotes;
-    [CanBeNull] public string EnemyTeamNotes;
 }
 
 [System.Serializable]
@@ -89,55 +69,49 @@ public class GenericResponse
 [System.Serializable]
 public class MatchDataSubmitRequest
 {
-    public string UserEmail;
-    public string MapName;
+    public int UserId;
+    public int MapId;
     public string Season;
     public string Rank;
     public int RankDivision;
     public int RankPercentage;
-    public string Hero_1;
-    public string Hero_2;
-    public string Hero_3;
+    public int Hero1Id;
+    public int? Hero2Id;
+    public int? Hero3Id;
     public string MatchResult;
-    public string TeamBan_1;
-    public string TeamBan_2;
-    public string EnemyTeamBan_1;
-    public string EnemyTeamBan_2;
-    public string TeamNotes;
-    public string EnemyTeamNotes;
+    public int TeamBan1Id;
+    public int TeamBan2Id;
+    public int EnemyTeamBan1Id;
+    public int EnemyTeamBan2Id;
+    [CanBeNull] public string TeamNotes;
+    [CanBeNull] public string EnemyTeamNotes;
 }
 
 [System.Serializable]
-public class EmailRequest
+public class UserIdRequest
 {
-    public string UserEmail;
+    public int UserId;
 }
 
 [System.Serializable]
-public class MatchResponse
+public class MatchData
 {
     public int Id;
-    public string UserEmail;
-    public string UploadTime;
-    public string MapName;
+    public int UserId;
+    public string SubmitTime;
+    public Map Map;
     public string Season;
     public string Rank;
     public int RankDivision;
     public int RankPercentage;
-    public string Hero_1;
-    public string Hero_2;
-    public string Hero_3;
+    public Hero Hero1;
+    [CanBeNull] public Hero Hero2;
+    [CanBeNull] public Hero Hero3;
     public string MatchResult;
-    public string TeamBan_1;
-    public string TeamBan_2;
-    public string EnemyTeamBan_1;
-    public string EnemyTeamBan_2;
-    public string TeamNotes;
-    public string EnemyTeamNotes;
-}
-
-[System.Serializable]
-public class MatchListResponse
-{
-    public List<MatchResponse> Matches;
+    public Hero TeamBan1;
+    public Hero TeamBan2;
+    public Hero EnemyTeamBan1;
+    public Hero EnemyTeamBan2;
+    [CanBeNull] public string TeamNotes;
+    [CanBeNull] public string EnemyTeamNotes;
 }
