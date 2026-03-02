@@ -73,8 +73,6 @@ using UnityEngine;
             _userEmail = userData.UserEmail;
             _role = userData.Role;
 
-            Debug.Log(_userId);
-            
             _ = UpdateMatchesData();
             _ = GetBaseDataFromDatabase();
         }
