@@ -61,6 +61,8 @@ public class MatchListViewer : MonoBehaviour
             InstantiateMatchListElements(matches.Count - _matchListElements.Count);
         }
         
+        
+        
         for (int i = 0; i < _matchListElements.Count; i++)
         {
             if (i < matches.Count)

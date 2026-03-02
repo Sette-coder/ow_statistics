@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Sirenix.OdinInspector;
+using Newtonsoft.Json;
+using static Tha7.Utility.FromDatabaseWrapper;
 
 
 public class ApiClient : MonoBehaviour
@@ -16,108 +18,108 @@ public class ApiClient : MonoBehaviour
             Instance = this;
     }
 
-    private readonly MapData[] _mapsList = new[]
+    private readonly Map[] _mapsList = new[]
     {
-        new MapData("King's Row", MapMode.Hybrid),
-        new MapData("Watchpoint: Gibraltar", MapMode.Escort),
-        new MapData("Numbani", MapMode.Hybrid),
-        new MapData("Dorado", MapMode.Escort),
-        new MapData("Hollywood", MapMode.Hybrid),
-        new MapData("Lijiang Tower", MapMode.Control),
-        new MapData("Ilios", MapMode.Control),
-        new MapData("Nepal", MapMode.Control),
-        new MapData("Route 66", MapMode.Escort),
-        new MapData("Eichenwalde", MapMode.Hybrid),
-        new MapData("Oasis", MapMode.Control),
-        new MapData("Junkertown", MapMode.Escort),
-        new MapData("Blizzard World", MapMode.Hybrid),
-        new MapData("Rialto", MapMode.Escort),
-        new MapData("Busan", MapMode.Control),
-        new MapData("Havana", MapMode.Escort),
-        new MapData("New Queen Street", MapMode.Push),
-        new MapData("Circuit Royal", MapMode.Escort),
-        new MapData("Colosseo", MapMode.Push),
-        new MapData("Midtown", MapMode.Hybrid),
-        new MapData("Paraíso", MapMode.Hybrid),
-        new MapData("Esperança", MapMode.Push),
-        new MapData("Shambali Monastery", MapMode.Escort),
-        new MapData("Antarctic Peninsula", MapMode.Control),
-        new MapData("New Junk City", MapMode.Flashpoint),
-        new MapData("Suravasa", MapMode.Flashpoint),
-        new MapData("Samoa", MapMode.Control),
-        new MapData("Runasapi", MapMode.Push),
-        new MapData("Aatlis", MapMode.Flashpoint)
+        new Map { Name = "King's Row", Mode = MapMode.Hybrid },
+        new Map { Name = "Watchpoint: Gibraltar", Mode = MapMode.Escort },
+        new Map { Name = "Numbani", Mode = MapMode.Hybrid },
+        new Map { Name = "Dorado", Mode = MapMode.Escort },
+        new Map { Name = "Hollywood", Mode = MapMode.Hybrid },
+        new Map { Name = "Lijiang Tower", Mode = MapMode.Control },
+        new Map { Name = "Ilios", Mode = MapMode.Control },
+        new Map { Name = "Nepal", Mode = MapMode.Control },
+        new Map { Name = "Route 66", Mode = MapMode.Escort },
+        new Map { Name = "Eichenwalde", Mode = MapMode.Hybrid },
+        new Map { Name = "Oasis", Mode = MapMode.Control },
+        new Map { Name = "Junkertown", Mode = MapMode.Escort },
+        new Map { Name = "Blizzard World", Mode = MapMode.Hybrid },
+        new Map { Name = "Rialto", Mode = MapMode.Escort },
+        new Map { Name = "Busan", Mode = MapMode.Control },
+        new Map { Name = "Havana", Mode = MapMode.Escort },
+        new Map { Name = "New Queen Street", Mode = MapMode.Push },
+        new Map { Name = "Circuit Royal", Mode = MapMode.Escort },
+        new Map { Name = "Colosseo", Mode = MapMode.Push },
+        new Map { Name = "Midtown", Mode = MapMode.Hybrid },
+        new Map { Name = "Paraíso", Mode = MapMode.Hybrid },
+        new Map { Name = "Esperança", Mode = MapMode.Push },
+        new Map { Name = "Shambali Monastery", Mode = MapMode.Escort },
+        new Map { Name = "Antarctic Peninsula", Mode = MapMode.Control },
+        new Map { Name = "New Junk City", Mode = MapMode.Flashpoint },
+        new Map { Name = "Suravasa", Mode = MapMode.Flashpoint },
+        new Map { Name = "Samoa", Mode = MapMode.Control },
+        new Map { Name = "Runasapi", Mode = MapMode.Push },
+        new Map { Name = "Aatlis", Mode = MapMode.Flashpoint }
     };
 
     private readonly Hero[] _heroes = new[]
     {
-        new Hero("Tracer", HeroRoles.Damage),
-        new Hero("Reaper", HeroRoles.Damage),
-        new Hero("Widowmaker", HeroRoles.Damage),
-        new Hero("Phara", HeroRoles.Damage),
-        new Hero("Reinhardt", HeroRoles.Tank),
-        new Hero("Mercy", HeroRoles.Support),
-        new Hero("Torbjörn", HeroRoles.Damage),
-        new Hero("Hanzo", HeroRoles.Damage),
-        new Hero("Winston", HeroRoles.Tank),
-        new Hero("Zenyatta", HeroRoles.Support),
-        new Hero("Bastion", HeroRoles.Damage),
-        new Hero("Symmetra", HeroRoles.Damage),
-        new Hero("Zarya", HeroRoles.Tank),
-        new Hero("Cassidy", HeroRoles.Damage),
-        new Hero("Soldier: 76", HeroRoles.Damage),
-        new Hero("Lúcio", HeroRoles.Support),
-        new Hero("Roadhog", HeroRoles.Tank),
-        new Hero("Junkrat", HeroRoles.Damage),
-        new Hero("D.Va", HeroRoles.Tank),
-        new Hero("Mei", HeroRoles.Damage),
-        new Hero("Genji", HeroRoles.Damage),
-        new Hero("Ana", HeroRoles.Support),
-        new Hero("Sombra", HeroRoles.Damage),
-        new Hero("Orisa", HeroRoles.Tank),
-        new Hero("Doomfist", HeroRoles.Tank),
-        new Hero("Moira", HeroRoles.Support),
-        new Hero("Brigitte", HeroRoles.Support),
-        new Hero("Wrecking Ball", HeroRoles.Tank),
-        new Hero("Ashe", HeroRoles.Damage),
-        new Hero("Baptiste", HeroRoles.Support),
-        new Hero("Sigma", HeroRoles.Tank),
-        new Hero("Echo", HeroRoles.Damage),
-        new Hero("Sojourn", HeroRoles.Damage),
-        new Hero("Junker Queen", HeroRoles.Tank),
-        new Hero("Kiriko", HeroRoles.Support),
-        new Hero("Ramattra", HeroRoles.Tank),
-        new Hero("Lifeweaver", HeroRoles.Support),
-        new Hero("Illari", HeroRoles.Support),
-        new Hero("Mauga", HeroRoles.Tank),
-        new Hero("Venture", HeroRoles.Damage),
-        new Hero("Juno", HeroRoles.Support),
-        new Hero("Hazard", HeroRoles.Tank),
-        new Hero("Freja", HeroRoles.Damage),
-        new Hero("Wuyang", HeroRoles.Support),
-        new Hero("Vendetta", HeroRoles.Damage),
-        new Hero("Domina", HeroRoles.Tank),
-        new Hero("Emre", HeroRoles.Damage),
-        new Hero("Mizuki", HeroRoles.Support),
-        new Hero("Anran", HeroRoles.Damage),
-        new Hero("Jetpack Cat", HeroRoles.Support),
+        new Hero { Name = "Tracer", Role = HeroRoles.Damage },
+        new Hero { Name = "Reaper", Role = HeroRoles.Damage },
+        new Hero { Name = "Widowmaker", Role = HeroRoles.Damage },
+        new Hero { Name = "Pharah", Role = HeroRoles.Damage },
+        new Hero { Name = "Reinhardt", Role = HeroRoles.Tank },
+        new Hero { Name = "Mercy", Role = HeroRoles.Support },
+        new Hero { Name = "Torbjörn", Role = HeroRoles.Damage },
+        new Hero { Name = "Hanzo", Role = HeroRoles.Damage },
+        new Hero { Name = "Winston", Role = HeroRoles.Tank },
+        new Hero { Name = "Zenyatta", Role = HeroRoles.Support },
+        new Hero { Name = "Bastion", Role = HeroRoles.Damage },
+        new Hero { Name = "Symmetra", Role = HeroRoles.Damage },
+        new Hero { Name = "Zarya", Role = HeroRoles.Tank },
+        new Hero { Name = "Cassidy", Role = HeroRoles.Damage },
+        new Hero { Name = "Soldier: 76", Role = HeroRoles.Damage },
+        new Hero { Name = "Lúcio", Role = HeroRoles.Support },
+        new Hero { Name = "Roadhog", Role = HeroRoles.Tank },
+        new Hero { Name = "Junkrat", Role = HeroRoles.Damage },
+        new Hero { Name = "D.Va", Role = HeroRoles.Tank },
+        new Hero { Name = "Mei", Role = HeroRoles.Damage },
+        new Hero { Name = "Genji", Role = HeroRoles.Damage },
+        new Hero { Name = "Ana", Role = HeroRoles.Support },
+        new Hero { Name = "Sombra", Role = HeroRoles.Damage },
+        new Hero { Name = "Orisa", Role = HeroRoles.Tank },
+        new Hero { Name = "Doomfist", Role = HeroRoles.Tank },
+        new Hero { Name = "Moira", Role = HeroRoles.Support },
+        new Hero { Name = "Brigitte", Role = HeroRoles.Support },
+        new Hero { Name = "Wrecking Ball", Role = HeroRoles.Tank },
+        new Hero { Name = "Ashe", Role = HeroRoles.Damage },
+        new Hero { Name = "Baptiste", Role = HeroRoles.Support },
+        new Hero { Name = "Sigma", Role = HeroRoles.Tank },
+        new Hero { Name = "Echo", Role = HeroRoles.Damage },
+        new Hero { Name = "Sojourn", Role = HeroRoles.Damage },
+        new Hero { Name = "Junker Queen", Role = HeroRoles.Tank },
+        new Hero { Name = "Kiriko", Role = HeroRoles.Support },
+        new Hero { Name = "Ramattra", Role = HeroRoles.Tank },
+        new Hero { Name = "Lifeweaver", Role = HeroRoles.Support },
+        new Hero { Name = "Illari", Role = HeroRoles.Support },
+        new Hero { Name = "Mauga", Role = HeroRoles.Tank },
+        new Hero { Name = "Venture", Role = HeroRoles.Damage },
+        new Hero { Name = "Juno", Role = HeroRoles.Support },
+        new Hero { Name = "Hazard", Role = HeroRoles.Tank },
+        new Hero { Name = "Freja", Role = HeroRoles.Damage },
+        new Hero { Name = "Wuyang", Role = HeroRoles.Support },
+        new Hero { Name = "Vendetta", Role = HeroRoles.Damage },
+        new Hero { Name = "Domina", Role = HeroRoles.Tank },
+        new Hero { Name = "Emre", Role = HeroRoles.Damage },
+        new Hero { Name = "Mizuki", Role = HeroRoles.Support },
+        new Hero { Name = "Anran", Role = HeroRoles.Damage },
+        new Hero { Name = "Jetpack Cat", Role = HeroRoles.Support }
     };
 
-    private string baseUrl = "https://api.thaseven.com/owstatistics/api"; // EC2 API Instace
-    //private string baseUrl = "http://localhost:5144/owstatistics/api"; // Your local API
+    private const string BASE_API_URL = "https://api.thaseven.com/owstatistics/api"; // EC2 API Instance
+    //private string BASE_API_URL = "http://localhost:5000/owstatistics/api"; // Your local API
 
     [ShowInInspector]
     private async void InitializeAllMaps()
     {
-        foreach (MapData map in _mapsList)
+        foreach (Map map in _mapsList)
         {
             try
             {
-                await CreateMapAsync(map.MapName, map.Mode);
+                await CreateMapAsync(map.Name, map.Mode);
             }
             catch (Exception e)
             {
-                Debug.LogError($"Error creating map: {map.MapName} with error: {e.Message}");
+                Debug.LogError($"Error creating map: {map.Name} with error: {e.Message}");
             }
         }
     }
@@ -129,11 +131,11 @@ public class ApiClient : MonoBehaviour
         {
             try
             {
-                await CreateHeroAsync(hero.HeroName, hero.Role);
+                await CreateHeroAsync(hero.Name, hero.Role);
             }
             catch (Exception e)
             {
-                Debug.LogError($"Error creating Hero: {hero.HeroName} with error: {e.Message}");
+                Debug.LogError($"Error creating Hero: {hero.Name} with error: {e.Message}");
             }
         }
     }
@@ -141,6 +143,25 @@ public class ApiClient : MonoBehaviour
     private void Awake()
     {
         SingletonSetup();
+    }
+
+    private UnityWebRequest CreatePostWebRequest(string body, string endpoint)
+    {
+        UnityWebRequest request = new UnityWebRequest(BASE_API_URL + endpoint, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(body);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Accept", "application/json");
+        return request;
+    }
+
+    private UnityWebRequest CreateGetWebRequest(string endpoint)
+    {
+        UnityWebRequest request = new UnityWebRequest(BASE_API_URL + endpoint, "GET");
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Accept", "application/json");
+        return request;
     }
 
     [ShowInInspector]
@@ -154,17 +175,13 @@ public class ApiClient : MonoBehaviour
             Role = "Client"
         };
 
-        string json = JsonUtility.ToJson(requestData);
+        string json = JsonConvert.SerializeObject(requestData);
 
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/user/create", "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
+        var request = CreatePostWebRequest(json, "/user/create");
 
         await request.SendWebRequest();
 
-        GenericResponse response = JsonUtility.FromJson<GenericResponse>(request.downloadHandler.text);
+        GenericResponse response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
         if (request.result == UnityWebRequest.Result.Success)
         {
             return response;
@@ -193,19 +210,14 @@ public class ApiClient : MonoBehaviour
             ModeId = (int)mapMode
         };
 
-        string json = JsonUtility.ToJson(requestData);
-
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/map/create", "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
+        string json = JsonConvert.SerializeObject(requestData);
+        var request = CreatePostWebRequest(json, "/map/create");
 
         await request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            MapResponse response = JsonUtility.FromJson<MapResponse>(request.downloadHandler.text);
+            MapResponse response = JsonConvert.DeserializeObject<MapResponse>(request.downloadHandler.text);
             Debug.Log($"response: {response}");
             return response;
         }
@@ -231,19 +243,13 @@ public class ApiClient : MonoBehaviour
             Role = role.ToString(),
         };
 
-        string json = JsonUtility.ToJson(requestData);
-
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/hero/create", "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
+        string json = JsonConvert.SerializeObject(requestData);
+        var request = CreatePostWebRequest(json, "/hero/create");
         await request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            HeroResponse response = JsonUtility.FromJson<HeroResponse>(request.downloadHandler.text);
+            HeroResponse response = JsonConvert.DeserializeObject<HeroResponse>(request.downloadHandler.text);
             Debug.Log($"response: {response.Name}");
             return response;
         }
@@ -263,16 +269,12 @@ public class ApiClient : MonoBehaviour
             Password = password,
         };
 
-        string json = JsonUtility.ToJson(requestData);
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/user/login", "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
+        string json = JsonConvert.SerializeObject(requestData);
+        var request = CreatePostWebRequest(json, "/user/login");
         await request.SendWebRequest();
 
-        LoginResponse response = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
+        LoginResponse response = JsonConvert.DeserializeObject<LoginResponse>(request.downloadHandler.text);
+
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log(
@@ -290,17 +292,12 @@ public class ApiClient : MonoBehaviour
     [ShowInInspector]
     public async Task<GenericResponse> SendMatchData(MatchDataSubmitRequest matchData)
     {
-        string json = JsonUtility.ToJson(matchData);
-
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/create", "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
+        string json = JsonConvert.SerializeObject(matchData);
+        var request = CreatePostWebRequest(json, "/match/create");
 
         await request.SendWebRequest();
 
-        GenericResponse response = JsonUtility.FromJson<GenericResponse>(request.downloadHandler.text);
+        GenericResponse response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log($"Match Upload OK: {response.ok}, with message: {response.ResponseMessage}");
@@ -314,61 +311,58 @@ public class ApiClient : MonoBehaviour
         }
     }
 
-    public async Task<List<MatchData>> GetMatchListByUsername(string username)
+    public async Task<List<MatchData>> GetMatchListByUserId(int userId)
     {
-        UsernameRequest requestData = new UsernameRequest
+        UserIdRequest requestData = new UserIdRequest
         {
-            Username = username
+            UserId = userId
         };
-        
-        string json = JsonUtility.ToJson(requestData);
-        UnityWebRequest request = new UnityWebRequest(baseUrl + "/match/get-by-username", "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
+
+        string json = JsonConvert.SerializeObject(requestData);
+        var request = CreatePostWebRequest(json, "/match/get-by-user-id");
 
         await request.SendWebRequest();
 
-        MatchListResponse response = JsonUtility.FromJson<MatchListResponse>(request.downloadHandler.text);
+        List<MatchData> response = JsonConvert.DeserializeObject<List<MatchData>>(request.downloadHandler.text);
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"Match List retrieved Successfully: {response.Matches.Count}");
-            var result = new List<MatchData>();
-
-            foreach (var match in response.Matches)
-            {
-                var newMatch = new MatchData
-                {
-                    Id = match.Id,
-                    Username = match.Username,
-                    UploadTime = match.UploadTime,
-                    MapName = Tha7.Utility.StringWrapper.FromMapName(match.MapName),
-                    Season = match.Season,
-                    Rank = match.Rank,
-                    RankDivision = match.RankDivision,
-                    RankPercentage = match.RankPercentage,
-                    Hero_1 = Tha7.Utility.StringWrapper.FromHeroName(match.Hero_1),
-                    Hero_2 = Tha7.Utility.StringWrapper.FromHeroName(match.Hero_2),
-                    Hero_3 = Tha7.Utility.StringWrapper.FromHeroName(match.Hero_3),
-                    MatchResult = match.MatchResult,
-                    TeamBan_1 = Tha7.Utility.StringWrapper.FromHeroName(match.TeamBan_1),
-                    TeamBan_2 = Tha7.Utility.StringWrapper.FromHeroName(match.TeamBan_2),
-                    EnemyTeamBan_1 = Tha7.Utility.StringWrapper.FromHeroName(match.EnemyTeamBan_1),
-                    EnemyTeamBan_2 = Tha7.Utility.StringWrapper.FromHeroName(match.EnemyTeamBan_2),
-                    TeamNotes = match.TeamNotes,
-                    EnemyTeamNotes = match.EnemyTeamNotes
-                };
-                result.Add(newMatch);
-            }
-            
-            return result;
+            Debug.Log($"Match List retrieved Successfully: {response.Count}");
+            return response;
         }
         else
         {
             Debug.LogError($"ERROR: {request.responseCode} with message: {request.error}");
             return null;
         }
+    }
+
+    public async Task<(List<FromDatabaseMaps> Maps, List<FromDatabaseHeroes> Heroes)> GetDatabaseData()
+    {
+        var mapsRequest = CreateGetWebRequest("/map/get-all-maps");
+
+        await mapsRequest.SendWebRequest();
+        var maps = JsonConvert.DeserializeObject<List<FromDatabaseMaps>>(mapsRequest.downloadHandler.text);
+
+        if (mapsRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING MAPS: {mapsRequest.responseCode} with message: {mapsRequest.error}");
+            return (null, null);
+        }
+
+        var heroesRequest = CreateGetWebRequest("/hero/get-all-heroes");
+
+        await heroesRequest.SendWebRequest();
+        var heroes = JsonConvert.DeserializeObject<List<FromDatabaseHeroes>>(heroesRequest.downloadHandler.text);
+
+        if (heroesRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(
+                $"ERROR RETRIEVING HEROES: {heroesRequest.responseCode} with message: {heroesRequest.error}");
+            return (null, null);
+        }
+
+        Debug.Log($"DatabaseData retrieved Successfully Maps Count: {maps.Count} || Heroes Count = {heroes.Count}");
+        return (maps, heroes);
     }
 }

@@ -10,16 +10,12 @@ public enum MapMode
     Flashpoint = 5
 }
 
-public struct MapData
+public class Map
 {
-    public string MapName;
+    public int Id;
+    public string Name;
     public MapMode Mode;
-
-    public MapData(string mapName, MapMode mode)
-    {
-        MapName = mapName;
-        Mode = mode;
-    }
+    public int ModeId;
 }
 
 public enum HeroRoles
@@ -30,16 +26,11 @@ public enum HeroRoles
     Tank = 3,
 }
 
-public struct Hero
+public class Hero
 {
-    public string HeroName;
+    public int Id;
+    public string Name;
     public HeroRoles Role;
-
-    public Hero(string heroName, HeroRoles role)
-    {
-        HeroName = heroName;
-        Role = role;
-    }
 }
 
 public enum MatchResult
@@ -51,104 +42,16 @@ public enum MatchResult
 
 public enum Ranks
 {
-    Bronze,
-    Silver,
-    Gold,
-    Platinum,
-    Diamond,
-    Master,
-    Grandmaster,
-    Champion
+    Bronze = 0,
+    Silver = 1,
+    Gold = 2,
+    Platinum = 3,
+    Diamond = 4,
+    Master = 5,
+    Grandmaster = 6,
+    Champion = 7
 }
 
-public enum Maps
-{
-    None = 0,
-    Kings_Row,
-    Watchpoint_Gibraltar,
-    Numbani,
-    Dorado,
-    Hollywood,
-    Lijiang_Tower,
-    Ilios,
-    Nepal,
-    Route66,
-    Eichenwalde,
-    Oasis,
-    Junkertown,
-    Blizzard_World,
-    Rialto,
-    Busan,
-    Havana,
-    New_Queen_Street,
-    Circuit_Royal,
-    Colosseo,
-    Midtown,
-    Paraiso,
-    Esperanca,
-    Shambali_Monastery,
-    Antarctic_Peninsula,
-    New_Junk_City,
-    Suravasa,
-    Samoa,
-    Runasapi,
-    Aatlis
-}
-
-public enum Heroes
-{
-    None = 0,
-    Tracer,
-    Reaper,
-    Widowmaker,
-    Pharah,
-    Reinhardt,
-    Mercy,
-    Torbjorn,
-    Hanzo,
-    Winston,
-    Zenyatta,
-    Bastion,
-    Symmetra,
-    Zarya,
-    Cassidy,
-    Soldier76,
-    Lucio,
-    Roadhog,
-    Junkrat,
-    DVa,
-    Mei,
-    Genji,
-    Ana,
-    Sombra,
-    Orisa,
-    Doomfist,
-    Moira,
-    Brigitte,
-    Wrecking_Ball,
-    Ashe,
-    Baptiste,
-    Sigma,
-    Echo,
-    Sojourn,
-    Junker_Queen,
-    Kiriko,
-    Ramattra,
-    Lifeweaver,
-    Illari,
-    Mauga,
-    Venture,
-    Juno,
-    Hazard,
-    Freja,
-    Wuyang,
-    Vendetta,
-    Domina,
-    Emre,
-    Mizuki,
-    Anran,
-    Jetpack_Cat
-}
 
 public enum PopUpType
 {
@@ -157,4 +60,21 @@ public enum PopUpType
     Success,
     Warning,
     Confirm
+}
+
+[System.Serializable]
+public class FromDatabaseMaps
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Mode { get; set; }
+    public int ModeId { get; set; }
+}
+
+[System.Serializable]
+public class FromDatabaseHeroes
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Role { get; set; }
 }
