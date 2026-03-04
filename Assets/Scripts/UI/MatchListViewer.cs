@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -10,71 +9,100 @@ public class MatchListViewer : MonoBehaviour
     [SerializeField] private GameObject _matchElementPrefab;
     [SerializeField] private Button _refreshListButton;
 
-    private List<MatchListElement> _matchListElements = new List<MatchListElement>();
+    private List<MatchListElement> _matchListElements = new();
 
     private void Awake()
     {
         _refreshListButton.onClick.AddListener(RetrieveDataFromDb);
-
-        if (_contentTransform.childCount > 0)
-            for (int child = _contentTransform.childCount - 1; child >= 0; child--)
-                DestroyImmediate(_contentTransform.GetChild(child).gameObject);
-
-        _matchListElements = new List<MatchListElement>();
+        ClearContent();
         InstantiateMatchListElements();
-    }
-
-    void InstantiateMatchListElements(int matchToInstantiate = 30)
-    {
-        for (int i = 0; i < matchToInstantiate; i++)
-        {
-            var newMatchElement = Instantiate(_matchElementPrefab, _contentTransform).GetComponent<MatchListElement>();
-            newMatchElement.gameObject.SetActive(false);
-            _matchListElements.Add(newMatchElement);
-        }
     }
 
     private void OnEnable()
     {
+        // Wait for data to be ready before populating — avoids empty list flash on first open
+        if (UserDataManager.Instance.IsDataReady)
+            UpdateList();
+    }
+
+    private void Start()
+    {
+        // Subscribe after Awake so we don't miss the event if data loads fast
+        GameEventManager.Instance.OnLoginSuccess += OnLoginSuccess;
+    }
+
+    private void OnDestroy()
+    {
+        GameEventManager.Instance.OnLoginSuccess -= OnLoginSuccess;
+    }
+
+    // Triggered when login completes and data finishes loading
+    private void OnLoginSuccess(object sender, LoginResponse response)
+    {
         UpdateList();
     }
 
-
+    // ─── Refresh button ────────────────────────────────────
     [ShowInInspector]
     public async void RetrieveDataFromDb()
     {
         _refreshListButton.interactable = false;
-        await UserDataManager.Instance.UpdateMatchesData();
-        _refreshListButton.interactable = true;
 
+        await UserDataManager.Instance.UpdateMatchesDataAsync(); // updated method name
         UpdateList();
+
+        _refreshListButton.interactable = true;
     }
 
-    void UpdateList()
+    // ─── List management ───────────────────────────────────
+    private void UpdateList()
     {
         var matches = UserDataManager.Instance.GetMatches();
 
-        if (matches.Count == 0) return;
-        
-        if (matches.Count > _matchListElements.Count)
+        if (matches == null || matches.Count == 0)
         {
-            InstantiateMatchListElements(matches.Count - _matchListElements.Count);
+            HideAllElements();
+            return;
         }
-        
-        
-        
-        for (int i = 0; i < _matchListElements.Count; i++)
-        {
+
+        // Instantiate more elements only if needed
+        if (matches.Count > _matchListElements.Count)
+            InstantiateMatchListElements(matches.Count - _matchListElements.Count);
+
+        for (var i = 0; i < _matchListElements.Count; i++)
             if (i < matches.Count)
             {
-                var element = matches[i];
-                _matchListElements[i].InitializeElements(element);
+                _matchListElements[i].InitializeElements(matches[i]);
                 _matchListElements[i].gameObject.SetActive(true);
             }
             else
             {
                 _matchListElements[i].gameObject.SetActive(false);
             }
+    }
+
+    private void InstantiateMatchListElements(int count = 30)
+    {
+        for (var i = 0; i < count; i++)
+        {
+            var element = Instantiate(_matchElementPrefab, _contentTransform)
+                .GetComponent<MatchListElement>();
+            element.gameObject.SetActive(false);
+            _matchListElements.Add(element);
         }
+    }
+
+    private void HideAllElements()
+    {
+        foreach (var element in _matchListElements)
+            element.gameObject.SetActive(false);
+    }
+
+    private void ClearContent()
+    {
+        for (var i = _contentTransform.childCount - 1; i >= 0; i--)
+            DestroyImmediate(_contentTransform.GetChild(i).gameObject);
+
+        _matchListElements.Clear();
     }
 }

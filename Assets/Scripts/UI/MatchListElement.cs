@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using static Tha7.Utility.FromDatabaseWrapper;
 
 public class MatchListElement : MonoBehaviour
 {
@@ -17,13 +16,13 @@ public class MatchListElement : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _enemyTeamBan2Text;
     [SerializeField] private TextMeshProUGUI _teamNotesText;
     [SerializeField] private TextMeshProUGUI _enemyTeamNotesText;
-    
-    private MatchData _matchData;
-    
-    public void InitializeElements(MatchData matchResponse)
+
+    private MatchDto _matchData;
+
+    public void InitializeElements(MatchDto matchResponse)
     {
         _matchData = matchResponse;
-        
+
         _matchResultText.text = matchResponse.MatchResult;
         _mapNameText.text = matchResponse.Map.Name;
         _seasonText.text = matchResponse.Season;

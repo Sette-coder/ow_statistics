@@ -68,7 +68,7 @@ public class CreateUserPage : BasePage
             _emailInputField.text,
             _passwordInputField.text);
 
-        if (!createUserCheck.ok)
+        if (!createUserCheck.Ok)
         {
             UiManager.Instance.OpenPopUp(
                 PopUpType.Error,

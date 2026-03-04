@@ -26,48 +26,40 @@ public class MatchLoader : MonoBehaviour
     [SerializeField] private Button _submitDataButton;
 
     private bool _dropDownSettedUp = false;
+
     private void Awake()
     {
         _submitDataButton.onClick.AddListener(SubmitData);
     }
-    
+
     private void OnEnable()
     {
-        if(!_dropDownSettedUp) SetupDropDown();
+        if (!_dropDownSettedUp) SetupDropDown();
         ResetDefault();
     }
-    
-    void SetupDropDown()
+
+    private void SetupDropDown()
     {
-        List<TMP_Dropdown.OptionData> mapOptions = new List<TMP_Dropdown.OptionData>();
+        var mapOptions = new List<TMP_Dropdown.OptionData>();
 
-        foreach (FromDatabaseMaps map in UserDataManager.Instance.GetMapList())
-        {
+        foreach (var map in UserDataManager.Instance.GetMapList())
             mapOptions.Add(new TMP_Dropdown.OptionData(map.Name));
-        }
 
-        List<TMP_Dropdown.OptionData> heroOptions = new List<TMP_Dropdown.OptionData>();
+        var heroOptions = new List<TMP_Dropdown.OptionData>();
 
         var heroes = UserDataManager.Instance.GetHeroesList();
 
         if (heroes.Count == 0) return;
-        
-        foreach (FromDatabaseHeroes hero in heroes)
-        {
-            heroOptions.Add(new TMP_Dropdown.OptionData(hero.Name));
-        }
 
-        List<TMP_Dropdown.OptionData> rankOptions = new List<TMP_Dropdown.OptionData>();
+        foreach (var hero in heroes) heroOptions.Add(new TMP_Dropdown.OptionData(hero.Name));
+
+        var rankOptions = new List<TMP_Dropdown.OptionData>();
         foreach (Ranks rank in Enum.GetValues(typeof(Ranks)))
-        {
             rankOptions.Add(new TMP_Dropdown.OptionData(rank.ToString()));
-        }
 
-        List<TMP_Dropdown.OptionData> matchResultOptions = new List<TMP_Dropdown.OptionData>();
+        var matchResultOptions = new List<TMP_Dropdown.OptionData>();
         foreach (MatchResult matchResult in Enum.GetValues(typeof(MatchResult)))
-        {
             matchResultOptions.Add(new TMP_Dropdown.OptionData(matchResult.ToString()));
-        }
 
         _mapDropdown.ClearOptions();
         _mapDropdown.AddOptions(mapOptions);
@@ -103,8 +95,7 @@ public class MatchLoader : MonoBehaviour
     }
 
 
-
-    void ResetDefault()
+    private void ResetDefault()
     {
         _mapDropdown.value = 0;
         _seasonInputField.text = "";
@@ -123,7 +114,7 @@ public class MatchLoader : MonoBehaviour
         _enemyTeamNotes.text = "";
     }
 
-    async void SubmitData()
+    private async void SubmitData()
     {
         if (string.IsNullOrWhiteSpace(_seasonInputField.text))
         {
@@ -181,14 +172,14 @@ public class MatchLoader : MonoBehaviour
         }
 
 
-        MatchDataSubmitRequest request = new MatchDataSubmitRequest
+        var request = new MatchDataSubmitRequest
         {
             UserId = UserDataManager.Instance.GetUserId(),
             MapId = GetMapIdFromName(_mapDropdown.options[_mapDropdown.value].text),
             Season = _seasonInputField.text,
             Rank = _rankDropDown.options[_rankDropDown.value].text,
-            RankDivision = Int32.Parse(_rankDivisionDropDown.options[_rankDivisionDropDown.value].text),
-            RankPercentage = Int32.Parse(_rankPercentageInputField.text),
+            RankDivision = int.Parse(_rankDivisionDropDown.options[_rankDivisionDropDown.value].text),
+            RankPercentage = int.Parse(_rankPercentageInputField.text),
             Hero1Id = GetHeroIdFromName(_hero1DropDown.options[_hero1DropDown.value].text),
             Hero2Id = _hero2DropDown.options[_hero2DropDown.value].text == "None"
                 ? null
@@ -207,31 +198,25 @@ public class MatchLoader : MonoBehaviour
 
         var response = await ApiClient.Instance.SendMatchData(request);
 
-        if (!response.ok)
-        {
+        if (!response.Ok)
             UiManager.Instance.OpenPopUp(PopUpType.Error, "Error", response.ResponseMessage);
-        }
         else
-        {
             UiManager.Instance.OpenPopUp(PopUpType.Success, "Success", response.ResponseMessage);
-        }
     }
 
-    bool DoubleHeroSettedCheck()
+    private bool DoubleHeroSettedCheck()
     {
         if (_hero2DropDown.value != 0 && _hero1DropDown.value == _hero2DropDown.value) return true;
 
         if (_hero2DropDown.value != 0 && _hero3DropDown.value != 0)
-        {
             return _hero1DropDown.value == _hero2DropDown.value ||
                    _hero1DropDown.value == _hero3DropDown.value ||
                    _hero2DropDown.value == _hero3DropDown.value;
-        }
 
         return false;
     }
 
-    bool HeroBanCheck(int heroValue)
+    private bool HeroBanCheck(int heroValue)
     {
         return heroValue == _teamBan1DropDown.value ||
                heroValue == _teamBan2DropDown.value ||
@@ -239,20 +224,20 @@ public class MatchLoader : MonoBehaviour
                heroValue == _enemyTeamBan2DropDown.value;
     }
 
-    bool DoubleBanCheck()
+    private bool DoubleBanCheck()
     {
         return
-            (_teamBan1DropDown.value == _teamBan2DropDown.value ||
-             _teamBan1DropDown.value == _enemyTeamBan1DropDown.value ||
-             _teamBan1DropDown.value == _enemyTeamBan2DropDown.value) ||
-            (_teamBan2DropDown.value == _teamBan1DropDown.value ||
-             _teamBan2DropDown.value == _enemyTeamBan1DropDown.value ||
-             _teamBan2DropDown.value == _enemyTeamBan2DropDown.value) ||
-            (_enemyTeamBan1DropDown.value == _teamBan1DropDown.value ||
-             _enemyTeamBan1DropDown.value == _teamBan2DropDown.value ||
-             _enemyTeamBan1DropDown.value == _enemyTeamBan2DropDown.value) ||
-            (_enemyTeamBan2DropDown.value == _teamBan1DropDown.value ||
-             _enemyTeamBan2DropDown.value == _teamBan2DropDown.value ||
-             _enemyTeamBan2DropDown.value == _enemyTeamBan1DropDown.value);
+            _teamBan1DropDown.value == _teamBan2DropDown.value ||
+            _teamBan1DropDown.value == _enemyTeamBan1DropDown.value ||
+            _teamBan1DropDown.value == _enemyTeamBan2DropDown.value ||
+            _teamBan2DropDown.value == _teamBan1DropDown.value ||
+            _teamBan2DropDown.value == _enemyTeamBan1DropDown.value ||
+            _teamBan2DropDown.value == _enemyTeamBan2DropDown.value ||
+            _enemyTeamBan1DropDown.value == _teamBan1DropDown.value ||
+            _enemyTeamBan1DropDown.value == _teamBan2DropDown.value ||
+            _enemyTeamBan1DropDown.value == _enemyTeamBan2DropDown.value ||
+            _enemyTeamBan2DropDown.value == _teamBan1DropDown.value ||
+            _enemyTeamBan2DropDown.value == _teamBan2DropDown.value ||
+            _enemyTeamBan2DropDown.value == _enemyTeamBan1DropDown.value;
     }
 }

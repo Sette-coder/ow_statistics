@@ -1,8 +1,7 @@
-using System.Collections.Generic;
+using System;
 using JetBrains.Annotations;
-using UnityEngine.Serialization;
 
-[System.Serializable]
+[Serializable]
 public class CreateUserRequest
 {
     public string Username;
@@ -11,7 +10,7 @@ public class CreateUserRequest
     public string Role;
 }
 
-[System.Serializable]
+[Serializable]
 public class CreateMapRequest
 {
     public string Name;
@@ -19,7 +18,7 @@ public class CreateMapRequest
     public int ModeId;
 }
 
-[System.Serializable]
+[Serializable]
 public class MapResponse
 {
     public string Name;
@@ -27,46 +26,48 @@ public class MapResponse
     public int ModeId;
 }
 
-[System.Serializable]
+[Serializable]
 public class CreateHeroRequest
 {
     public string Name;
     public string Role;
 }
 
-[System.Serializable]
+[Serializable]
 public class HeroResponse
 {
     public string Name;
     public string Role;
 }
 
-[System.Serializable]
+[Serializable]
 public class LoginRequest
 {
     public string UsernameOrEmail;
     public string Password;
 }
 
-[System.Serializable]
+[Serializable]
 public class LoginResponse
 {
-    public bool Authorized;
-    public int UserId;
-    public string Username;
-    public string UserEmail;
-    public string Role;
-    public string LoginMessage;
+    public bool Authorized { get; set; } = false;
+    public int UserId { get; set; } = -1;
+    public string Username { get; set; } = "";
+    public string UserEmail { get; set; } = "";
+    public string Role { get; set; } = "";
+    public string AccessToken { get; set; } = "";
+    public string RefreshToken { get; set; } = "";
+    public string LoginMessage { get; set; } = "";
 }
 
-[System.Serializable]
+[Serializable]
 public class GenericResponse
 {
-    public bool ok;
+    public bool Ok;
     public string ResponseMessage;
 }
 
-[System.Serializable]
+[Serializable]
 public class MatchDataSubmitRequest
 {
     public int UserId;
@@ -76,8 +77,6 @@ public class MatchDataSubmitRequest
     public int RankDivision;
     public int RankPercentage;
     public int Hero1Id;
-    public int? Hero2Id;
-    public int? Hero3Id;
     public string MatchResult;
     public int TeamBan1Id;
     public int TeamBan2Id;
@@ -85,33 +84,119 @@ public class MatchDataSubmitRequest
     public int EnemyTeamBan2Id;
     [CanBeNull] public string TeamNotes;
     [CanBeNull] public string EnemyTeamNotes;
+    public int? Hero2Id;
+    public int? Hero3Id;
 }
 
-[System.Serializable]
+[Serializable]
+public class RefreshRequest
+{
+    public string RefreshToken { get; set; } = "";
+}
+
+[Serializable]
+public class RefreshResponse
+{
+    public string AccessToken { get; set; } = "";
+    public string RefreshToken { get; set; } = "";
+}
+
+[Serializable]
+public class UserProfileResponse
+{
+    public int UserId { get; set; }
+    public string Username { get; set; } = "";
+    public string UserEmail { get; set; } = "";
+    public string Role { get; set; } = "";
+}
+
+[Serializable]
+public class UpdateUserRequest
+{
+    [CanBeNull] public string Username { get; set; } // null = no change
+    [CanBeNull] public string Email { get; set; } // null = no change
+    [CanBeNull] public string CurrentPassword { get; set; } // required only when changing password as non-admin
+    [CanBeNull] public string NewPassword { get; set; } // null = no change
+    [CanBeNull] public string Role { get; set; } // null = no change, Admin only
+}
+
+[Serializable]
+public class UpdateUserResponse
+{
+    public bool Ok { get; set; } = false;
+    public string ResponseMessage { get; set; } = "";
+    public int UserId { get; set; }
+    public string Username { get; set; } = "";
+    public string UserEmail { get; set; } = "";
+    public string Role { get; set; } = "";
+    public bool SessionsRevoked { get; set; } = false; // tells Unity to force re-login
+}
+
+[Serializable]
 public class UserIdRequest
 {
     public int UserId;
 }
 
-[System.Serializable]
-public class MatchData
+public class CreateMatchRequest
 {
-    public int Id;
-    public int UserId;
-    public string SubmitTime;
-    public Map Map;
-    public string Season;
-    public string Rank;
-    public int RankDivision;
-    public int RankPercentage;
-    public Hero Hero1;
-    [CanBeNull] public Hero Hero2;
-    [CanBeNull] public Hero Hero3;
-    public string MatchResult;
-    public Hero TeamBan1;
-    public Hero TeamBan2;
-    public Hero EnemyTeamBan1;
-    public Hero EnemyTeamBan2;
-    [CanBeNull] public string TeamNotes;
-    [CanBeNull] public string EnemyTeamNotes;
+    public int UserId { get; set; } = -1;
+    public int MapId { get; set; } = -1;
+    public string Season { get; set; } = "";
+    public string Rank { get; set; } = "";
+    public int RankDivision { get; set; } = 0;
+    public int RankPercentage { get; set; } = 0;
+    public int Hero1Id { get; set; } = -1;
+    public int? Hero2Id { get; set; }
+    public int? Hero3Id { get; set; }
+    public string MatchResult { get; set; } = "";
+    public int TeamBan1Id { get; set; } = -1;
+    public int TeamBan2Id { get; set; } = -1;
+    public int EnemyTeamBan1Id { get; set; } = -1;
+    public int EnemyTeamBan2Id { get; set; } = -1;
+    [CanBeNull] public string TeamNotes { get; set; }
+    [CanBeNull] public string EnemyTeamNotes { get; set; }
+}
+
+public class UpdateMatchRequest
+{
+    // All fields optional — only provided fields will be updated
+    public int? MapId { get; set; }
+    [CanBeNull] public string Season { get; set; }
+    [CanBeNull] public string Rank { get; set; }
+    public int? RankDivision { get; set; }
+    public int? RankPercentage { get; set; }
+    public int? Hero1Id { get; set; }
+    public int? Hero2Id { get; set; } // send -1 to clear
+    public int? Hero3Id { get; set; } // send -1 to clear
+    [CanBeNull] public string MatchResult { get; set; }
+    public int? TeamBan1Id { get; set; }
+    public int? TeamBan2Id { get; set; }
+    public int? EnemyTeamBan1Id { get; set; }
+    public int? EnemyTeamBan2Id { get; set; }
+    [CanBeNull] public string TeamNotes { get; set; }
+    [CanBeNull] public string EnemyTeamNotes { get; set; }
+}
+
+
+public class MatchDto
+{
+    public int Id { get; set; } = -1;
+    public int UserId { get; set; } = -1;
+    public DateTime SubmitTime { get; set; } = DateTime.UtcNow;
+    public Map Map { get; set; } = new();
+    public string Season { get; set; } = "";
+    public string Rank { get; set; } = "";
+    public int RankDivision { get; set; } = -1;
+    public int RankPercentage { get; set; } = -1;
+    public Hero Hero1 { get; set; } = new();
+    [CanBeNull] public Hero Hero2 { get; set; }
+    [CanBeNull] public Hero Hero3 { get; set; }
+    public string MatchResult { get; set; } = "";
+    public Hero TeamBan1 { get; set; } = new();
+    public Hero TeamBan2 { get; set; } = new();
+    public Hero EnemyTeamBan1 { get; set; } = new();
+    public Hero EnemyTeamBan2 { get; set; } = new();
+    [CanBeNull] public string TeamNotes { get; set; }
+    [CanBeNull] public string EnemyTeamNotes { get; set; }
 }

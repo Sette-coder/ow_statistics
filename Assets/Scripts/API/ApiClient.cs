@@ -1,199 +1,252 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Networking;
-using Sirenix.OdinInspector;
-using Newtonsoft.Json;
-using static Tha7.Utility.FromDatabaseWrapper;
-
 
 public class ApiClient : MonoBehaviour
 {
+    private const string BASE_API_URL = "https://api.thaseven.com/owstatistics/api";
+
+    //private const string BASE_API_URL = "http://localhost:5000/owstatistics/api";
     public static ApiClient Instance;
 
-    private void SingletonSetup()
+    private void Awake()
     {
         if (Instance == null)
             Instance = this;
     }
 
-    private readonly Map[] _mapsList = new[]
+    // ─── Web Request Builders ──────────────────────────────
+    private UnityWebRequest CreateGetWebRequest(string endpoint)
     {
-        new Map { Name = "King's Row", Mode = MapMode.Hybrid },
-        new Map { Name = "Watchpoint: Gibraltar", Mode = MapMode.Escort },
-        new Map { Name = "Numbani", Mode = MapMode.Hybrid },
-        new Map { Name = "Dorado", Mode = MapMode.Escort },
-        new Map { Name = "Hollywood", Mode = MapMode.Hybrid },
-        new Map { Name = "Lijiang Tower", Mode = MapMode.Control },
-        new Map { Name = "Ilios", Mode = MapMode.Control },
-        new Map { Name = "Nepal", Mode = MapMode.Control },
-        new Map { Name = "Route 66", Mode = MapMode.Escort },
-        new Map { Name = "Eichenwalde", Mode = MapMode.Hybrid },
-        new Map { Name = "Oasis", Mode = MapMode.Control },
-        new Map { Name = "Junkertown", Mode = MapMode.Escort },
-        new Map { Name = "Blizzard World", Mode = MapMode.Hybrid },
-        new Map { Name = "Rialto", Mode = MapMode.Escort },
-        new Map { Name = "Busan", Mode = MapMode.Control },
-        new Map { Name = "Havana", Mode = MapMode.Escort },
-        new Map { Name = "New Queen Street", Mode = MapMode.Push },
-        new Map { Name = "Circuit Royal", Mode = MapMode.Escort },
-        new Map { Name = "Colosseo", Mode = MapMode.Push },
-        new Map { Name = "Midtown", Mode = MapMode.Hybrid },
-        new Map { Name = "Paraíso", Mode = MapMode.Hybrid },
-        new Map { Name = "Esperança", Mode = MapMode.Push },
-        new Map { Name = "Shambali Monastery", Mode = MapMode.Escort },
-        new Map { Name = "Antarctic Peninsula", Mode = MapMode.Control },
-        new Map { Name = "New Junk City", Mode = MapMode.Flashpoint },
-        new Map { Name = "Suravasa", Mode = MapMode.Flashpoint },
-        new Map { Name = "Samoa", Mode = MapMode.Control },
-        new Map { Name = "Runasapi", Mode = MapMode.Push },
-        new Map { Name = "Aatlis", Mode = MapMode.Flashpoint }
-    };
-
-    private readonly Hero[] _heroes = new[]
-    {
-        new Hero { Name = "Tracer", Role = HeroRoles.Damage },
-        new Hero { Name = "Reaper", Role = HeroRoles.Damage },
-        new Hero { Name = "Widowmaker", Role = HeroRoles.Damage },
-        new Hero { Name = "Pharah", Role = HeroRoles.Damage },
-        new Hero { Name = "Reinhardt", Role = HeroRoles.Tank },
-        new Hero { Name = "Mercy", Role = HeroRoles.Support },
-        new Hero { Name = "Torbjörn", Role = HeroRoles.Damage },
-        new Hero { Name = "Hanzo", Role = HeroRoles.Damage },
-        new Hero { Name = "Winston", Role = HeroRoles.Tank },
-        new Hero { Name = "Zenyatta", Role = HeroRoles.Support },
-        new Hero { Name = "Bastion", Role = HeroRoles.Damage },
-        new Hero { Name = "Symmetra", Role = HeroRoles.Damage },
-        new Hero { Name = "Zarya", Role = HeroRoles.Tank },
-        new Hero { Name = "Cassidy", Role = HeroRoles.Damage },
-        new Hero { Name = "Soldier: 76", Role = HeroRoles.Damage },
-        new Hero { Name = "Lúcio", Role = HeroRoles.Support },
-        new Hero { Name = "Roadhog", Role = HeroRoles.Tank },
-        new Hero { Name = "Junkrat", Role = HeroRoles.Damage },
-        new Hero { Name = "D.Va", Role = HeroRoles.Tank },
-        new Hero { Name = "Mei", Role = HeroRoles.Damage },
-        new Hero { Name = "Genji", Role = HeroRoles.Damage },
-        new Hero { Name = "Ana", Role = HeroRoles.Support },
-        new Hero { Name = "Sombra", Role = HeroRoles.Damage },
-        new Hero { Name = "Orisa", Role = HeroRoles.Tank },
-        new Hero { Name = "Doomfist", Role = HeroRoles.Tank },
-        new Hero { Name = "Moira", Role = HeroRoles.Support },
-        new Hero { Name = "Brigitte", Role = HeroRoles.Support },
-        new Hero { Name = "Wrecking Ball", Role = HeroRoles.Tank },
-        new Hero { Name = "Ashe", Role = HeroRoles.Damage },
-        new Hero { Name = "Baptiste", Role = HeroRoles.Support },
-        new Hero { Name = "Sigma", Role = HeroRoles.Tank },
-        new Hero { Name = "Echo", Role = HeroRoles.Damage },
-        new Hero { Name = "Sojourn", Role = HeroRoles.Damage },
-        new Hero { Name = "Junker Queen", Role = HeroRoles.Tank },
-        new Hero { Name = "Kiriko", Role = HeroRoles.Support },
-        new Hero { Name = "Ramattra", Role = HeroRoles.Tank },
-        new Hero { Name = "Lifeweaver", Role = HeroRoles.Support },
-        new Hero { Name = "Illari", Role = HeroRoles.Support },
-        new Hero { Name = "Mauga", Role = HeroRoles.Tank },
-        new Hero { Name = "Venture", Role = HeroRoles.Damage },
-        new Hero { Name = "Juno", Role = HeroRoles.Support },
-        new Hero { Name = "Hazard", Role = HeroRoles.Tank },
-        new Hero { Name = "Freja", Role = HeroRoles.Damage },
-        new Hero { Name = "Wuyang", Role = HeroRoles.Support },
-        new Hero { Name = "Vendetta", Role = HeroRoles.Damage },
-        new Hero { Name = "Domina", Role = HeroRoles.Tank },
-        new Hero { Name = "Emre", Role = HeroRoles.Damage },
-        new Hero { Name = "Mizuki", Role = HeroRoles.Support },
-        new Hero { Name = "Anran", Role = HeroRoles.Damage },
-        new Hero { Name = "Jetpack Cat", Role = HeroRoles.Support }
-    };
-
-    private const string BASE_API_URL = "https://api.thaseven.com/owstatistics/api"; // EC2 API Instance
-    //private string BASE_API_URL = "http://localhost:5000/owstatistics/api"; // Your local API
-
-    [ShowInInspector]
-    private async void InitializeAllMaps()
-    {
-        foreach (Map map in _mapsList)
-        {
-            try
-            {
-                await CreateMapAsync(map.Name, map.Mode);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error creating map: {map.Name} with error: {e.Message}");
-            }
-        }
-    }
-
-    [ShowInInspector]
-    private async void InitializeAllHeroes()
-    {
-        foreach (Hero hero in _heroes)
-        {
-            try
-            {
-                await CreateHeroAsync(hero.Name, hero.Role);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error creating Hero: {hero.Name} with error: {e.Message}");
-            }
-        }
-    }
-
-    private void Awake()
-    {
-        SingletonSetup();
+        var request = new UnityWebRequest(BASE_API_URL + endpoint, "GET");
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Accept", "application/json");
+        AttachAuthToken(request);
+        return request;
     }
 
     private UnityWebRequest CreatePostWebRequest(string body, string endpoint)
     {
-        UnityWebRequest request = new UnityWebRequest(BASE_API_URL + endpoint, "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(body);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        var request = new UnityWebRequest(BASE_API_URL + endpoint, "POST");
+        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
         request.SetRequestHeader("Accept", "application/json");
+        AttachAuthToken(request);
         return request;
     }
 
-    private UnityWebRequest CreateGetWebRequest(string endpoint)
+    private UnityWebRequest CreatePutWebRequest(string body, string endpoint)
     {
-        UnityWebRequest request = new UnityWebRequest(BASE_API_URL + endpoint, "GET");
+        var request = new UnityWebRequest(BASE_API_URL + endpoint, "PUT");
+        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
         request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
         request.SetRequestHeader("Accept", "application/json");
+        AttachAuthToken(request);
         return request;
     }
 
-    [ShowInInspector]
-    public async Task<GenericResponse> CreateUserAsync(string username, string email, string password)
+    private void AttachAuthToken(UnityWebRequest request)
     {
-        CreateUserRequest requestData = new CreateUserRequest
+        if (UserDataManager.Instance != null && UserDataManager.Instance.IsLoggedIn)
+            request.SetRequestHeader("Authorization", $"Bearer {UserDataManager.Instance.AccessToken}");
+    }
+
+    // ─── Token Refresh ─────────────────────────────────────
+
+    // Tries to refresh the access token silently.
+    // Returns true if successful, false if the session has fully expired.
+    private async Task<bool> TryRefreshTokenAsync()
+    {
+        var refreshToken = UserDataManager.Instance?.RefreshToken;
+        if (string.IsNullOrEmpty(refreshToken))
         {
-            Username = username,
-            Email = email,
-            Password = password,
-            Role = "Client"
-        };
+            Debug.LogWarning("No refresh token available — forcing logout.");
+            ForceLogout();
+            return false;
+        }
 
-        string json = JsonConvert.SerializeObject(requestData);
-
-        var request = CreatePostWebRequest(json, "/user/create");
+        var body = JsonConvert.SerializeObject(new RefreshRequest { RefreshToken = refreshToken });
+        var request = CreatePostWebRequest(body, "/user/refresh");
 
         await request.SendWebRequest();
 
-        GenericResponse response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
-        if (request.result == UnityWebRequest.Result.Success)
+        if (request.result != UnityWebRequest.Result.Success)
         {
-            return response;
+            Debug.LogWarning($"Token refresh failed ({request.responseCode}) — forcing logout.");
+            ForceLogout();
+            return false;
         }
-        else
-        {
-            Debug.LogError("Error creating user: " + request.error);
-            response.ResponseMessage = $"Error {request.responseCode}, {response.ResponseMessage}";
-            return response;
-        }
+
+        var response = JsonConvert.DeserializeObject<RefreshResponse>(request.downloadHandler.text);
+        UserDataManager.Instance.StoreTokens(response.AccessToken, response.RefreshToken);
+        Debug.Log("Token refreshed silently.");
+        return true;
     }
 
+    // Retries a GET request once after a silent token refresh on 401
+    private async Task<UnityWebRequest> SendWithRefreshAsync(
+        UnityWebRequest request, Func<UnityWebRequest> rebuilder)
+    {
+        await request.SendWebRequest();
+
+        if (request.responseCode != 401)
+            return request;
+
+        Debug.Log("401 received — attempting silent token refresh.");
+        var refreshed = await TryRefreshTokenAsync();
+        if (!refreshed) return request;
+
+        // Rebuild the request with the new token and retry once
+        var retry = rebuilder();
+        await retry.SendWebRequest();
+        return retry;
+    }
+
+    private void ForceLogout()
+    {
+        GameEventManager.Instance.OnLogout.Invoke(this, EventArgs.Empty);
+    }
+
+    // ─── Database Data ─────────────────────────────────────
+    public async Task<(List<FromDatabaseMaps> Maps, List<FromDatabaseHeroes> Heroes)> GetDatabaseData()
+    {
+        var mapsRequest = await SendWithRefreshAsync(
+            CreateGetWebRequest("/map/get-all-maps"),
+            () => CreateGetWebRequest("/map/get-all-maps"));
+
+        if (mapsRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING MAPS: {mapsRequest.responseCode} - {mapsRequest.error}");
+            return (null, null);
+        }
+
+        var maps = JsonConvert.DeserializeObject<List<FromDatabaseMaps>>(mapsRequest.downloadHandler.text);
+
+        var heroesRequest = await SendWithRefreshAsync(
+            CreateGetWebRequest("/hero/get-all-heroes"),
+            () => CreateGetWebRequest("/hero/get-all-heroes"));
+
+        if (heroesRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING HEROES: {heroesRequest.responseCode} - {heroesRequest.error}");
+            return (null, null);
+        }
+
+        var heroes = JsonConvert.DeserializeObject<List<FromDatabaseHeroes>>(heroesRequest.downloadHandler.text);
+
+        Debug.Log($"Database data retrieved — Maps: {maps.Count} | Heroes: {heroes.Count}");
+        return (maps, heroes);
+    }
+
+    // ─── User Management ───────────────────────────────────
+    [ShowInInspector]
+    public async Task<GenericResponse> CreateUserAsync(string username, string email, string password)
+    {
+        var body = JsonConvert.SerializeObject(new CreateUserRequest
+        {
+            Username = username, Email = email, Password = password, Role = "Client"
+        });
+        var request = CreatePostWebRequest(body, "/user/create");
+        await request.SendWebRequest();
+
+        var response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR CREATING USER: {request.responseCode} - {response?.ResponseMessage}");
+            response.ResponseMessage = $"Error {request.responseCode}: {response?.ResponseMessage}";
+            return response;
+        }
+
+        Debug.Log($"User created successfully: {response.ResponseMessage}");
+        return response;
+    }
+
+    [ShowInInspector]
+    public async Task<LoginResponse> TryLogin(string usernameOrEmail, string password)
+    {
+        var body = JsonConvert.SerializeObject(new LoginRequest
+                                                   { UsernameOrEmail = usernameOrEmail, Password = password });
+        var request = CreatePostWebRequest(body, "/user/login");
+        await request.SendWebRequest();
+
+        var response = JsonConvert.DeserializeObject<LoginResponse>(request.downloadHandler.text);
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR LOGIN: {request.responseCode} - {response?.LoginMessage}");
+            return response;
+        }
+
+        Debug.Log($"Login successful — user: {response.Username}, role: {response.Role}");
+        GameEventManager.Instance.OnLoginSuccess.Invoke(this, response);
+        return response;
+    }
+
+    // ─── Match Management ──────────────────────────────────
+    [ShowInInspector]
+    public async Task<GenericResponse> SendMatchData(MatchDataSubmitRequest matchData)
+    {
+        var body = JsonConvert.SerializeObject(matchData);
+        var request = await SendWithRefreshAsync(
+            CreatePostWebRequest(body, "/match/create"),
+            () => CreatePostWebRequest(body, "/match/create"));
+
+        var response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR SENDING MATCH: {request.responseCode} - {response?.ResponseMessage}");
+            response.ResponseMessage = $"Error {request.responseCode}: {response?.ResponseMessage}";
+            return response;
+        }
+
+        Debug.Log($"Match uploaded successfully: {response.ResponseMessage}");
+        return response;
+    }
+
+    public async Task<List<MatchDto>> GetMatchListByUserId(int userId)
+    {
+        var body = JsonConvert.SerializeObject(new UserIdRequest { UserId = userId });
+        var request = await SendWithRefreshAsync(
+            CreatePostWebRequest(body, "/match/get-by-user-id"),
+            () => CreatePostWebRequest(body, "/match/get-by-user-id"));
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING MATCHES: {request.responseCode} - {request.error}");
+            return null;
+        }
+
+        var response = JsonConvert.DeserializeObject<List<MatchDto>>(request.downloadHandler.text);
+        Debug.Log($"Match list retrieved — count: {response?.Count}");
+        return response;
+    }
+
+    public async Task<GenericResponse> UpdateMatchAsync(int matchId, UpdateMatchRequest matchData)
+    {
+        var body = JsonConvert.SerializeObject(matchData);
+        var request = await SendWithRefreshAsync(
+            CreatePutWebRequest(body, $"/match/update/{matchId}"),
+            () => CreatePutWebRequest(body, $"/match/update/{matchId}"));
+
+        var response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR UPDATING MATCH: {request.responseCode} - {response?.ResponseMessage}");
+            response.ResponseMessage = $"Error {request.responseCode}: {response?.ResponseMessage}";
+            return response;
+        }
+
+        Debug.Log($"Match updated successfully: {response.ResponseMessage}");
+        return response;
+    }
+
+    // ─── Admin Only ────────────────────────────────────────
     [ShowInInspector]
     private async Task<MapResponse> CreateMapAsync(string mapName, MapMode mapMode)
     {
@@ -203,29 +256,23 @@ public class ApiClient : MonoBehaviour
             return null;
         }
 
-        CreateMapRequest requestData = new CreateMapRequest
+        var body = JsonConvert.SerializeObject(new CreateMapRequest
         {
-            Name = mapName,
-            Mode = mapMode.ToString(),
-            ModeId = (int)mapMode
-        };
+            Name = mapName, Mode = mapMode.ToString(), ModeId = (int)mapMode
+        });
+        var request = await SendWithRefreshAsync(
+            CreatePostWebRequest(body, "/map/create"),
+            () => CreatePostWebRequest(body, "/map/create"));
 
-        string json = JsonConvert.SerializeObject(requestData);
-        var request = CreatePostWebRequest(json, "/map/create");
-
-        await request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
+        if (request.result != UnityWebRequest.Result.Success)
         {
-            MapResponse response = JsonConvert.DeserializeObject<MapResponse>(request.downloadHandler.text);
-            Debug.Log($"response: {response}");
-            return response;
-        }
-        else
-        {
-            Debug.LogError("Error creating new Map: " + request.error);
+            Debug.LogError($"ERROR CREATING MAP: {request.responseCode} - {request.error}");
             return null;
         }
+
+        var response = JsonConvert.DeserializeObject<MapResponse>(request.downloadHandler.text);
+        Debug.Log($"Map created: {response?.Name}");
+        return response;
     }
 
     [ShowInInspector]
@@ -237,132 +284,20 @@ public class ApiClient : MonoBehaviour
             return null;
         }
 
-        CreateHeroRequest requestData = new CreateHeroRequest
-        {
-            Name = heroName,
-            Role = role.ToString(),
-        };
+        var body = JsonConvert.SerializeObject(new CreateHeroRequest
+                                                   { Name = heroName, Role = role.ToString() });
+        var request = await SendWithRefreshAsync(
+            CreatePostWebRequest(body, "/hero/create"),
+            () => CreatePostWebRequest(body, "/hero/create"));
 
-        string json = JsonConvert.SerializeObject(requestData);
-        var request = CreatePostWebRequest(json, "/hero/create");
-        await request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
+        if (request.result != UnityWebRequest.Result.Success)
         {
-            HeroResponse response = JsonConvert.DeserializeObject<HeroResponse>(request.downloadHandler.text);
-            Debug.Log($"response: {response.Name}");
-            return response;
-        }
-        else
-        {
-            Debug.LogError("Error creating new Hero: " + request.error);
+            Debug.LogError($"ERROR CREATING HERO: {request.responseCode} - {request.error}");
             return null;
         }
-    }
 
-    [ShowInInspector]
-    public async Task<LoginResponse> TryLogin(string usernameOrEmail, string password)
-    {
-        LoginRequest requestData = new LoginRequest
-        {
-            UsernameOrEmail = usernameOrEmail,
-            Password = password,
-        };
-
-        string json = JsonConvert.SerializeObject(requestData);
-        var request = CreatePostWebRequest(json, "/user/login");
-        await request.SendWebRequest();
-
-        LoginResponse response = JsonConvert.DeserializeObject<LoginResponse>(request.downloadHandler.text);
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log(
-                $"LOGIN COMPLETED you are authorized: {response.Authorized}, with message: {response.LoginMessage}");
-            GameEventManager.Instance.OnLoginSuccess.Invoke(this, response);
-            return response;
-        }
-        else
-        {
-            Debug.LogError($"ERROR: {request.responseCode} with message: {response.LoginMessage}");
-            return response;
-        }
-    }
-
-    [ShowInInspector]
-    public async Task<GenericResponse> SendMatchData(MatchDataSubmitRequest matchData)
-    {
-        string json = JsonConvert.SerializeObject(matchData);
-        var request = CreatePostWebRequest(json, "/match/create");
-
-        await request.SendWebRequest();
-
-        GenericResponse response = JsonConvert.DeserializeObject<GenericResponse>(request.downloadHandler.text);
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log($"Match Upload OK: {response.ok}, with message: {response.ResponseMessage}");
-            return response;
-        }
-        else
-        {
-            Debug.LogError($"ERROR: {request.responseCode} with message: {response.ResponseMessage}");
-            response.ResponseMessage = $"Error {request.responseCode}, {response.ResponseMessage}";
-            return response;
-        }
-    }
-
-    public async Task<List<MatchData>> GetMatchListByUserId(int userId)
-    {
-        UserIdRequest requestData = new UserIdRequest
-        {
-            UserId = userId
-        };
-
-        string json = JsonConvert.SerializeObject(requestData);
-        var request = CreatePostWebRequest(json, "/match/get-by-user-id");
-
-        await request.SendWebRequest();
-
-        List<MatchData> response = JsonConvert.DeserializeObject<List<MatchData>>(request.downloadHandler.text);
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log($"Match List retrieved Successfully: {response.Count}");
-            return response;
-        }
-        else
-        {
-            Debug.LogError($"ERROR: {request.responseCode} with message: {request.error}");
-            return null;
-        }
-    }
-
-    public async Task<(List<FromDatabaseMaps> Maps, List<FromDatabaseHeroes> Heroes)> GetDatabaseData()
-    {
-        var mapsRequest = CreateGetWebRequest("/map/get-all-maps");
-
-        await mapsRequest.SendWebRequest();
-        var maps = JsonConvert.DeserializeObject<List<FromDatabaseMaps>>(mapsRequest.downloadHandler.text);
-
-        if (mapsRequest.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError($"ERROR RETRIEVING MAPS: {mapsRequest.responseCode} with message: {mapsRequest.error}");
-            return (null, null);
-        }
-
-        var heroesRequest = CreateGetWebRequest("/hero/get-all-heroes");
-
-        await heroesRequest.SendWebRequest();
-        var heroes = JsonConvert.DeserializeObject<List<FromDatabaseHeroes>>(heroesRequest.downloadHandler.text);
-
-        if (heroesRequest.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError(
-                $"ERROR RETRIEVING HEROES: {heroesRequest.responseCode} with message: {heroesRequest.error}");
-            return (null, null);
-        }
-
-        Debug.Log($"DatabaseData retrieved Successfully Maps Count: {maps.Count} || Heroes Count = {heroes.Count}");
-        return (maps, heroes);
+        var response = JsonConvert.DeserializeObject<HeroResponse>(request.downloadHandler.text);
+        Debug.Log($"Hero created: {response?.Name}");
+        return response;
     }
 }
