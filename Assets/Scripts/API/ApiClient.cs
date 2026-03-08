@@ -300,4 +300,63 @@ public class ApiClient : MonoBehaviour
         Debug.Log($"Hero created: {response?.Name}");
         return response;
     }
+    
+    // null  = all maps
+    // int   = specific map
+    public async Task<List<AggregatedStatsResponse>> GetStatsByMapAsync(int? mapId = null)
+    {
+        var endpoint = mapId.HasValue
+            ? $"/match/my-stats/by-map?mapId={mapId.Value}"
+            : "/match/my-stats/by-map";
+
+        var request = await SendWithRefreshAsync(
+            CreateGetWebRequest(endpoint),
+            () => CreateGetWebRequest(endpoint));
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING MAP STATS: {request.responseCode} - {request.error}");
+            return null;
+        }
+
+        return JsonConvert.DeserializeObject<List<AggregatedStatsResponse>>(request.downloadHandler.text);
+    }
+    
+// All heroes filtered by role (optional) — always uses all slots
+    public async Task<List<AggregatedStatsResponse>> GetStatsByHeroAsync(string role = null)
+    {
+        var endpoint = "/match/my-stats/by-hero";
+        if (!string.IsNullOrEmpty(role))
+            endpoint += $"?role={role}";
+
+        var request = await SendWithRefreshAsync(
+            CreateGetWebRequest(endpoint),
+            () => CreateGetWebRequest(endpoint));
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING HERO STATS: {request.responseCode} - {request.error}");
+            return null;
+        }
+
+        return JsonConvert.DeserializeObject<List<AggregatedStatsResponse>>(request.downloadHandler.text);
+    }
+
+// Single hero — onlyHero1 only makes sense here
+    public async Task<AggregatedStatsResponse> GetStatsByHeroAsync(int heroId, bool onlyHero1 = false)
+    {
+        var endpoint = $"/match/my-stats/by-hero?heroId={heroId}&onlyHero1={onlyHero1.ToString().ToLower()}";
+
+        var request = await SendWithRefreshAsync(
+            CreateGetWebRequest(endpoint),
+            () => CreateGetWebRequest(endpoint));
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"ERROR RETRIEVING HERO STATS: {request.responseCode} - {request.error}");
+            return null;
+        }
+
+        return JsonConvert.DeserializeObject<AggregatedStatsResponse>(request.downloadHandler.text);
+    }
 }

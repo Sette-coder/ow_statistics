@@ -200,3 +200,16 @@ public class MatchDto
     [CanBeNull] public string TeamNotes { get; set; }
     [CanBeNull] public string EnemyTeamNotes { get; set; }
 }
+
+[Serializable]
+// Shared response for both map and hero aggregations
+public class AggregatedStatsResponse
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = ""; // map name or hero name
+    public string SubGroup { get; set; } = ""; // hero role (empty for maps)
+    public int TotalMatches { get; set; }
+    public int Wins { get; set; }
+    public int Losses { get; set; }
+    public double WinRate { get; set; }
+}
